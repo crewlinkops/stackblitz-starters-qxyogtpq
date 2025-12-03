@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Light mode */
+  --foreground-rgb: 17, 24, 39;        /* slate-900 */
+  --background-rgb: 243, 244, 246;     /* slate-100 */
+  --surface-rgb: 255, 255, 255;        /* white */
+  --muted-surface-rgb: 249, 250, 251;  /* slate-50 */
+  --border-rgb: 229, 231, 235;         /* slate-200 */
+
+  --danger-bg-rgb: 254, 226, 226;
+  --danger-border-rgb: 252, 165, 165;
+  --danger-text-rgb: 185, 28, 28;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Dark mode */
+    --foreground-rgb: 229, 231, 235;       /* slate-200 */
+    --background-rgb: 15, 23, 42;          /* slate-900 */
+    --surface-rgb: 15, 23, 42;             /* same as background, card style */
+    --muted-surface-rgb: 15, 23, 42;
+    --border-rgb: 55, 65, 81;              /* slate-700 */
+
+    --danger-bg-rgb: 69, 10, 10;
+    --danger-border-rgb: 127, 29, 29;
+    --danger-text-rgb: 252, 165, 165;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-rgb));
+}
