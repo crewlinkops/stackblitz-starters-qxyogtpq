@@ -240,7 +240,7 @@ export default function WizardBookingPage({ params }: PageProps) {
                             <div className="space-y-6 flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
                                 <div>
                                     <h2 className="text-2xl font-bold text-white mb-2">What can we help with?</h2>
-                                    <p className="text-slate-400">Describe the issue you're facing. Our technicians will review this before your appointment.</p>
+                                    <p className="text-slate-400">Describe the issue you&apos;re facing. Our technicians will review this before your appointment.</p>
                                 </div>
                                 <textarea
                                     className="w-full bg-slate-800/50 border border-slate-700 rounded-xl p-4 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all min-h-[180px] text-lg resize-none"
@@ -348,7 +348,7 @@ export default function WizardBookingPage({ params }: PageProps) {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-slate-500 text-sm font-medium uppercase tracking-widest mb-1">Issue Description</span>
-                                        <span className="text-slate-300 bg-slate-900/50 p-3 rounded-lg border border-white/5 italic">"{issueDescription}"</span>
+                                        <span className="text-slate-300 bg-slate-900/50 p-3 rounded-lg border border-white/5 italic">&quot;{issueDescription}&quot;</span>
                                     </div>
                                 </div>
 

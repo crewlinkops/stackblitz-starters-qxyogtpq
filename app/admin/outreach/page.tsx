@@ -53,7 +53,7 @@ export default function OutreachPage() {
             <header className="mb-10 text-center sm:text-left border-b border-slate-400/10 pb-8">
                 <h1 className="text-3xl font-bold text-white tracking-tight mb-3">SMS Outreach</h1>
                 <p className="text-slate-400 text-lg max-w-2xl">
-                    Send personalized booking links directly to your customers' phones via SMS.
+                    Provide a specialized link to let customers describe their issue before picking a time. They&apos;ll be guided through a full booking wizard.
                 </p>
             </header>
 
@@ -125,13 +125,13 @@ export default function OutreachPage() {
                     <div className="bg-slate-800/40 rounded-2xl p-6 border border-white/5 shadow-sm hover:border-blue-500/30 transition-colors">
                         <div className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3">Direct Link Flow</div>
                         <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 italic text-slate-300 leading-relaxed">
-                            "Hi! You can book your appointment with us directly here: [Origin]/b/{currentBusiness.slug}"
+                            &quot;Hi! You can book your appointment with us directly here: [Origin]/b/{currentBusiness.slug}&quot;
                         </div>
                     </div>
                     <div className="bg-slate-800/40 rounded-2xl p-6 border border-white/5 shadow-sm hover:border-emerald-500/30 transition-colors">
                         <div className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-3">Wizard Link Flow</div>
                         <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 italic text-slate-300 leading-relaxed">
-                            "Hi! Please use our service wizard to book your appointment: [Origin]/wizard/{currentBusiness.slug}"
+                            &quot;Hi! Please use our service wizard to book your appointment: [Origin]/wizard/{currentBusiness.slug}&quot;
                         </div>
                     </div>
                 </div>
