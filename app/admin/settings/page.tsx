@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { ThemeToggle } from "../../components/ThemeToggle";
 
+import { useBusiness } from "../BusinessContext";
+
 type Scheduling = {
   id: number;
   business_slug: string;
@@ -16,7 +18,7 @@ type Scheduling = {
 };
 
 export default function SchedulingAdminPage() {
-  const [businessSlug, setBusinessSlug] = useState("test-plumber");
+  const { currentBusiness, loading: bizLoading } = useBusiness();
 
   const [record, setRecord] = useState<Scheduling | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,10 +31,8 @@ export default function SchedulingAdminPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const loadSettings = async () => {
-    if (!businessSlug.trim()) {
-      setError("Enter a business slug first.");
-      return;
-    }
+    if (!currentBusiness?.slug) return;
+
     setError(null);
     setMessage(null);
     setLoading(true);
@@ -40,7 +40,7 @@ export default function SchedulingAdminPage() {
     const { data, error } = await supabase
       .from("business_scheduling")
       .select("*")
-      .eq("business_slug", businessSlug.trim())
+      .eq("business_slug", currentBusiness.slug)
       .maybeSingle();
 
     if (error && error.code !== "PGRST116") {
@@ -54,7 +54,7 @@ export default function SchedulingAdminPage() {
       // no settings yet; create default in state
       setRecord({
         id: 0,
-        business_slug: businessSlug.trim(),
+        business_slug: currentBusiness.slug,
         work_start: "09:00:00",
         work_end: "17:00:00",
         lunch_start: "12:00:00",
@@ -67,7 +67,7 @@ export default function SchedulingAdminPage() {
     }
 
     setLoading(false);
-    checkGoogleConnection(businessSlug.trim());
+    checkGoogleConnection(currentBusiness.slug);
   };
 
   const checkGoogleConnection = async (slug: string) => {
@@ -100,11 +100,32 @@ export default function SchedulingAdminPage() {
     }
   };
 
+  const handleDisconnect = async () => {
+    if (!currentBusiness?.slug) return;
+    const confirmed = window.confirm("Disconnect Google Calendar? Future bookings will no longer sync and existing tokens will be deleted.");
+    if (!confirmed) return;
+
+    setGoogleLoading(true);
+    const { error } = await supabase
+      .from("google_tokens")
+      .delete()
+      .eq("business_slug", currentBusiness.slug);
+
+    if (error) {
+      setError("Failed to disconnect: " + error.message);
+    } else {
+      setGoogleConnected(false);
+      setGoogleEvents([]);
+      setMessage("Google Calendar disconnected.");
+    }
+    setGoogleLoading(false);
+  };
+
   useEffect(() => {
-    // auto-load for default business
+    if (bizLoading) return;
     loadSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [currentBusiness?.slug, bizLoading]);
 
   const handleChange = (field: keyof Scheduling, value: any) => {
     if (!record) return;
@@ -113,14 +134,14 @@ export default function SchedulingAdminPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!record) return;
+    if (!record || !currentBusiness?.slug) return;
 
     setSaving(true);
     setError(null);
     setMessage(null);
 
     const payload = {
-      business_slug: record.business_slug.trim(),
+      business_slug: currentBusiness.slug,
       work_start: record.work_start,
       work_end: record.work_end,
       lunch_start: record.lunch_start || null,
@@ -170,12 +191,22 @@ export default function SchedulingAdminPage() {
   const fromTimeInput = (t: string) =>
     t ? (t.length === 5 ? t + ":00" : t) : null;
 
+  if (bizLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-pulse text-zinc-500 font-bold uppercase tracking-widest text-sm italic">
+          Loading business settings...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
       <header className="mb-10 text-center sm:text-left border-b border-zinc-200 dark:border-white/5 pb-8">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Scheduling Settings</h1>
         <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-          Configure your business hours and sync with external calendars.
+          Configure <span className="text-red-600 font-bold">{currentBusiness?.name}</span>'s business hours and sync with external calendars.
         </p>
       </header>
 
@@ -211,10 +242,10 @@ export default function SchedulingAdminPage() {
               ) : (
                 <button
                   onClick={() => {
-                    if (!record?.business_slug) return;
-                    window.location.href = `/api/google-calendar/auth?slug=${record.business_slug}`;
+                    if (!currentBusiness?.slug) return;
+                    window.location.href = `/api/google-calendar/auth?slug=${currentBusiness.slug}`;
                   }}
-                  disabled={!record}
+                  disabled={!currentBusiness}
                   className="flex items-center gap-2 px-6 py-3 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 18 18" fill="currentColor">
@@ -251,10 +282,7 @@ export default function SchedulingAdminPage() {
                   </div>
                 )}
                 <button
-                  onClick={() => {
-                    const confirmed = window.confirm("Disconnect Google Calendar? Future bookings will no longer sync.");
-                    if (confirmed) setGoogleConnected(false);
-                  }}
+                  onClick={handleDisconnect}
                   className="mt-6 text-[10px] font-bold text-rose-500/60 uppercase tracking-widest hover:text-rose-400 transition-colors"
                 >
                   Disconnect Integration
@@ -299,22 +327,6 @@ export default function SchedulingAdminPage() {
             </div>
           </div>
         )}
-
-        {/* Slug Switcher (Utility) */}
-        <div className="bg-zinc-100/40 dark:bg-zinc-900/40 rounded-2xl border border-zinc-200 dark:border-white/5 p-4 flex items-center gap-4">
-          <input
-            value={businessSlug}
-            onChange={(e) => setBusinessSlug(e.target.value)}
-            className="flex-1 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-700 dark:text-zinc-300 text-sm focus:outline-none focus:ring-1 focus:ring-red-600/50"
-            placeholder="Business slug..."
-          />
-          <button
-            onClick={loadSettings}
-            className="px-6 py-2.5 bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:bg-zinc-700 text-zinc-900 dark:text-white text-xs font-bold rounded-xl transition-all border border-zinc-200 dark:border-white/5"
-          >
-            Load Settings
-          </button>
-        </div>
 
         {loading ? (
           <div className="py-20 text-center text-zinc-500 dark:text-zinc-500 animate-pulse font-medium italic">
