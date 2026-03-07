@@ -2,10 +2,6 @@ import { google } from "googleapis";
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "./env";
 import { supabase } from "@/app/lib/supabaseClient";
 
-import { google } from "googleapis";
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "./env";
-import { supabase } from "@/app/lib/supabaseClient";
-
 // Helper to get a fresh client every time - safer for serverless env vars
 const getOAuthClient = (customRedirectUri?: string) => {
   return new google.auth.OAuth2(
