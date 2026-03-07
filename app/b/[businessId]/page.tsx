@@ -284,22 +284,22 @@ export default function BookingPage({ params }: PageProps) {
 
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30">
+    <main className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-800 dark:text-zinc-200 font-sans selection:bg-red-600/30">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <header className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-white tracking-tight mb-4">
+          <h1 className="text-4xl font-bold text-zinc-900 dark:text-white tracking-tight mb-4">
             Book an Appointment
           </h1>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
-            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-sm font-medium">
+            <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
             {businessSlug}
           </div>
         </header>
 
         {loading && (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
-            <p className="text-slate-400 animate-pulse">Checking availability...</p>
+            <div className="w-12 h-12 border-4 border-red-600/20 border-t-red-600 rounded-full animate-spin mb-4"></div>
+            <p className="text-zinc-600 dark:text-zinc-400 animate-pulse">Checking availability...</p>
           </div>
         )}
 
@@ -311,13 +311,13 @@ export default function BookingPage({ params }: PageProps) {
         )}
 
         {!loading && message && (
-          <div className="mb-8 p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center">
+          <div className="mb-8 p-8 rounded-2xl bg-red-600/10 border border-red-600/20 text-red-500 text-center">
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-2xl font-bold mb-2">Booking Requested!</h2>
             <p>{message}</p>
             <button
               onClick={() => setMessage(null)}
-              className="mt-6 px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-colors"
+              className="mt-6 px-6 py-2 rounded-lg bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-semibold transition-colors"
             >
               Book another
             </button>
@@ -325,8 +325,8 @@ export default function BookingPage({ params }: PageProps) {
         )}
 
         {!loading && !message && calendlyUrl && (
-          <div className="rounded-2xl border border-slate-400/10 bg-slate-900/50 p-6 backdrop-blur-sm shadow-2xl">
-            <p className="text-slate-400 mb-6 text-center italic">
+          <div className="rounded-2xl border border-zinc-400/10 bg-zinc-100/50 dark:bg-zinc-900/50 p-6 backdrop-blur-sm shadow-xl dark:shadow-2xl">
+            <p className="text-zinc-600 dark:text-zinc-400 mb-6 text-center italic">
               Schedule your appointment using our secure booking system below:
             </p>
             <CalendlyWidget
@@ -341,21 +341,21 @@ export default function BookingPage({ params }: PageProps) {
 
         {!loading && !message && !calendlyUrl && (
           <div className="space-y-8">
-            <div className="p-1 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20">
-              <div className="bg-slate-900/90 rounded-[calc(1rem-4px)] p-6 sm:p-10 backdrop-blur-xl border border-white/5 shadow-2xl">
-                <p className="text-slate-400 mb-8 text-center sm:text-lg">
+            <div className="p-1 rounded-2xl bg-gradient-to-br from-red-600/20 to-purple-500/20">
+              <div className="bg-zinc-100/90 dark:bg-zinc-900/90 rounded-[calc(1rem-4px)] p-6 sm:p-10 backdrop-blur-xl border border-zinc-200 dark:border-white/5 shadow-xl dark:shadow-2xl">
+                <p className="text-zinc-600 dark:text-zinc-400 mb-8 text-center sm:text-lg">
                   Choose a service and select an available time window that works best for you.
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label htmlFor="name" className="block text-sm font-medium text-slate-400 ml-1">
+                      <label htmlFor="name" className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">
                         Full Name
                       </label>
                       <input
                         id="name"
-                        className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                        className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all"
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
                         placeholder="John Doe"
@@ -364,13 +364,13 @@ export default function BookingPage({ params }: PageProps) {
                     </div>
 
                     <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-medium text-slate-400 ml-1">
+                      <label htmlFor="email" className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">
                         Email Address
                       </label>
                       <input
                         id="email"
                         type="email"
-                        className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                        className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all"
                         value={customerEmail}
                         onChange={(e) => setCustomerEmail(e.target.value)}
                         placeholder="john@example.com"
@@ -380,13 +380,13 @@ export default function BookingPage({ params }: PageProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="phone" className="block text-sm font-medium text-slate-400 ml-1">
+                    <label htmlFor="phone" className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">
                       Phone Number (for SMS confirmation)
                     </label>
                     <input
                       id="phone"
                       type="tel"
-                      className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all"
                       value={customerPhone}
                       onChange={(e) => setCustomerPhone(e.target.value)}
                       placeholder="+1 (555) 000-0000"
@@ -394,12 +394,12 @@ export default function BookingPage({ params }: PageProps) {
                   </div>
 
                   <div className="space-y-2">
-                    <label htmlFor="service" className="block text-sm font-medium text-slate-400 ml-1">
+                    <label htmlFor="service" className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">
                       Select Service
                     </label>
                     <select
                       id="service"
-                      className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer"
+                      className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all appearance-none cursor-pointer"
                       value={selectedServiceId ?? ""}
                       onChange={(e) =>
                         setSelectedServiceId(
@@ -408,9 +408,9 @@ export default function BookingPage({ params }: PageProps) {
                       }
                       required
                     >
-                      <option value="" className="bg-slate-900">Choose a service...</option>
+                      <option value="" className="bg-zinc-100 dark:bg-zinc-900">Choose a service...</option>
                       {services.map((svc) => (
-                        <option key={svc.id} value={svc.id} className="bg-slate-900">
+                        <option key={svc.id} value={svc.id} className="bg-zinc-100 dark:bg-zinc-900">
                           {svc.name}
                           {svc.duration_min ? ` (${svc.duration_min} min)` : ""}
                         </option>
@@ -419,12 +419,12 @@ export default function BookingPage({ params }: PageProps) {
                   </div>
 
                   <div className="space-y-4">
-                    <label className="block text-sm font-medium text-slate-400 ml-1">
+                    <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1">
                       Available Appointments
                     </label>
                     {slots.length === 0 ? (
-                      <div className="p-8 rounded-xl border border-dashed border-slate-700 text-center">
-                        <p className="text-slate-500">No open time slots right now. Please check back later.</p>
+                      <div className="p-8 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 text-center">
+                        <p className="text-zinc-500 dark:text-zinc-500">No open time slots right now. Please check back later.</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
@@ -432,8 +432,8 @@ export default function BookingPage({ params }: PageProps) {
                           <label
                             key={slot.id}
                             className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedSlotId === slot.id
-                              ? "bg-blue-600/20 border-blue-500/50 ring-1 ring-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
-                              : "bg-slate-800/30 border-slate-700 hover:border-slate-600"
+                              ? "bg-red-700/20 border-red-600/50 ring-1 ring-red-600/50 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                              : "bg-zinc-200/30 dark:bg-zinc-800/30 border-zinc-300 dark:border-zinc-700 hover:border-zinc-600"
                               }`}
                           >
                             <input
@@ -445,17 +445,17 @@ export default function BookingPage({ params }: PageProps) {
                               onChange={() => setSelectedSlotId(slot.id)}
                             />
                             <div className="flex-1">
-                              <div className="text-white font-medium">
+                              <div className="text-zinc-900 dark:text-white font-medium">
                                 {formatTimeRange(slot.start_time, slot.end_time)}
                               </div>
                               {slot.technician_name && (
-                                <div className="text-xs text-slate-500 mt-0.5">
+                                <div className="text-xs text-zinc-500 dark:text-zinc-500 mt-0.5">
                                   With {slot.technician_name}
                                 </div>
                               )}
                             </div>
                             {selectedSlotId === slot.id && (
-                              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-[10px] text-white">
+                              <div className="w-5 h-5 bg-red-600 rounded-full flex items-center justify-center text-[10px] text-zinc-900 dark:text-white">
                                 ✓
                               </div>
                             )}
@@ -468,11 +468,11 @@ export default function BookingPage({ params }: PageProps) {
                   <button
                     type="submit"
                     disabled={submitting || slots.length === 0}
-                    className="w-full mt-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                    className="w-full mt-4 bg-red-700 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-900 dark:text-white font-bold py-4 rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
                   >
                     {submitting ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        <div className="w-5 h-5 border-2 border-zinc-200 dark:border-white/20 border-t-white rounded-full animate-spin"></div>
                         <span>Processing...</span>
                       </>
                     ) : (

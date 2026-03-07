@@ -82,7 +82,7 @@ export default function BookingsAdminPage() {
       const { data: techData, error: techErr } = await supabase
         .from("technicians")
         .select("id, name")
-        .eq("business_id", currentBusiness.id)
+        .eq("business_slug", currentBusiness.slug)
         .eq("active", true)
         .order("name", { ascending: true });
 
@@ -93,7 +93,7 @@ export default function BookingsAdminPage() {
       const { data: svcData, error: svcErr } = await supabase
         .from("services")
         .select("id, name")
-        .eq("business_id", currentBusiness.id)
+        .eq("business_slug", currentBusiness.slug)
         .order("name", { ascending: true });
 
       if (svcErr) throw svcErr;
@@ -103,9 +103,9 @@ export default function BookingsAdminPage() {
       const { data: bookingData, error: bookingErr } = await supabase
         .from("bookings")
         .select(
-          "id, business_id, business_slug, customer_name, customer_email, service_id, preferred_time, status, created_at, assigned_technician_id"
+          "id, business_slug, customer_name, customer_email, service_id, preferred_time, status, created_at, assigned_technician_id"
         )
-        .eq("business_id", currentBusiness.id)
+        .eq("business_slug", currentBusiness.slug)
         .order("created_at", { ascending: false });
 
       if (bookingErr) throw bookingErr;
@@ -144,7 +144,7 @@ export default function BookingsAdminPage() {
         .from("bookings")
         .update({ status: newStatus })
         .eq("id", booking.id)
-        .eq("business_id", currentBusiness.id);
+        .eq("business_slug", currentBusiness.slug);
 
       if (updErr) throw updErr;
 
@@ -167,18 +167,18 @@ export default function BookingsAdminPage() {
   // ---------------------------------------------------------------------------
   return (
     <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-8">
+      <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-200 dark:border-white/5 pb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Service Bookings</h1>
-          <p className="text-slate-400">
+          <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Service Bookings</h1>
+          <p className="text-zinc-600 dark:text-zinc-400">
             {currentBusiness
               ? `Real-time requests for ${currentBusiness.name}`
               : "Select a business to view its scheduled bookings."}
           </p>
         </div>
         {currentBusiness && (
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider">
-            <span className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-xs font-bold uppercase tracking-wider">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
             Live Updates
           </div>
         )}
@@ -191,28 +191,27 @@ export default function BookingsAdminPage() {
         </div>
       )}
 
-      <div className="bg-slate-900/40 rounded-3xl border border-white/5 overflow-hidden backdrop-blur-sm shadow-xl">
+      <div className="bg-zinc-100/40 dark:bg-zinc-900/40 rounded-3xl border border-zinc-200 dark:border-white/5 overflow-hidden backdrop-blur-sm shadow-md dark:shadow-xl">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 space-y-4">
-            <div className="w-8 h-8 border-3 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
-            <p className="text-slate-500 font-medium italic">Scanning local repository...</p>
+            <div className="w-8 h-8 border-3 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
+            <p className="text-zinc-500 dark:text-zinc-500 font-medium italic">Scanning local repository...</p>
           </div>
         ) : bookings.length === 0 ? (
-          <div className="text-center py-32 rounded-3xl bg-slate-950/20">
-            <div className="text-6xl mb-6 grayscale opacity-20">📅</div>
-            <h3 className="text-xl font-bold text-slate-400 mb-2">No data recorded</h3>
-            <p className="text-slate-600 max-w-sm mx-auto">Active bookings will appear here once customers complete the scheduling flow.</p>
+          <div className="text-center py-32 rounded-3xl bg-zinc-100 dark:bg-zinc-950/20">
+            <h3 className="text-xl font-bold text-zinc-600 dark:text-zinc-400 mb-2">No data recorded</h3>
+            <p className="text-zinc-600 max-w-sm mx-auto">Active bookings will appear here once customers complete the scheduling flow.</p>
           </div>
         ) : (
           <div className="overflow-x-auto ring-1 ring-white/5 rounded-3xl">
-            <table className="min-w-full divide-y divide-white/5 bg-slate-900/60">
-              <thead className="bg-slate-950/60">
+            <table className="min-w-full divide-y divide-white/5 bg-zinc-100/60 dark:bg-zinc-900/60">
+              <thead className="bg-zinc-100 dark:bg-zinc-950/60">
                 <tr>
-                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">Order Ref</th>
-                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Contact</th>
-                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Requirement</th>
-                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Timeframe</th>
-                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Status</th>
+                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-[0.2em] whitespace-nowrap">Order Ref</th>
+                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-[0.2em]">Contact</th>
+                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-[0.2em]">Requirement</th>
+                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-[0.2em]">Timeframe</th>
+                  <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-[0.2em]">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -220,32 +219,31 @@ export default function BookingsAdminPage() {
                   <tr key={b.id} className="group hover:bg-white/5 transition-colors duration-300">
                     <td className="px-6 py-6 whitespace-nowrap">
                       <div className="flex flex-col gap-1">
-                        <span className="text-xs font-bold text-white px-2 py-1 rounded bg-slate-800 border border-white/5 w-fit">#{b.id}</span>
-                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">{formatDateTime(b.created_at).split(',')[0]}</span>
+                        <span className="text-xs font-bold text-zinc-900 dark:text-white px-2 py-1 rounded bg-zinc-200 dark:bg-zinc-800 border border-zinc-200 dark:border-white/5 w-fit">#{b.id}</span>
+                        <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">{formatDateTime(b.created_at).split(',')[0]}</span>
                       </div>
                     </td>
                     <td className="px-6 py-6">
                       <div className="flex flex-col">
-                        <span className="text-sm font-bold text-white mb-0.5 group-hover:text-blue-400 transition-colors uppercase tracking-tight">{b.customer_name || "Guest User"}</span>
-                        <span className="text-xs text-slate-500 font-medium italic">{b.customer_email || "no-email-provided"}</span>
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white mb-0.5 group-hover:text-red-500 transition-colors uppercase tracking-tight">{b.customer_name || "Guest User"}</span>
+                        <span className="text-xs text-zinc-500 dark:text-zinc-500 font-medium italic">{b.customer_email || "no-email-provided"}</span>
                       </div>
                     </td>
                     <td className="px-6 py-6">
                       <div className="space-y-1.5 min-w-[140px]">
-                        <div className="text-xs font-bold text-slate-300 flex items-center gap-2">
-                          <span className="w-1 h-3 bg-blue-500/60 rounded-full"></span>
+                        <div className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
+                          <span className="w-1 h-3 bg-red-600/60 rounded-full"></span>
                           {serviceName(b.service_id)}
                         </div>
-                        <div className="text-[10px] font-bold text-slate-600 uppercase flex items-center gap-1.5 pl-3">
-                          <span className="grayscale opacity-50 text-[12px]">👤</span>
+                        <div className="text-[10px] font-bold text-zinc-600 uppercase flex items-center gap-1.5 pl-3">
                           {technicianName(b.assigned_technician_id)}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-6">
                       <div className="flex flex-col gap-1 min-w-[120px]">
-                        <span className="text-sm font-medium text-slate-200">{formatDateTime(b.preferred_time).split(',')[1] || "Flexible"}</span>
-                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider">{formatDateTime(b.preferred_time).split(',')[0]}</span>
+                        <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{formatDateTime(b.preferred_time).split(',')[1] || "Flexible"}</span>
+                        <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-wider">{formatDateTime(b.preferred_time).split(',')[0]}</span>
                       </div>
                     </td>
                     <td className="px-6 py-6 text-right sm:text-left">
@@ -254,19 +252,19 @@ export default function BookingsAdminPage() {
                           value={b.status || "new"}
                           onChange={(e) => handleStatusChange(b, e.target.value || "new")}
                           disabled={updating}
-                          className={`w-full appearance-none bg-slate-800/80 border border-white/10 rounded-xl px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all ${b.status === 'completed' ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' :
+                          className={`w-full appearance-none bg-zinc-200/80 dark:bg-zinc-800/80 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-600/40 transition-all ${b.status === 'completed' ? 'text-red-500 border-red-600/20 bg-red-600/5' :
                             b.status === 'cancelled' ? 'text-rose-400 border-rose-500/20 bg-rose-500/5' :
-                              b.status === 'confirmed' ? 'text-blue-400 border-blue-500/20 bg-blue-500/5' :
-                                'text-slate-400'
+                              b.status === 'confirmed' ? 'text-red-500 border-red-600/20 bg-red-600/5' :
+                                'text-zinc-600 dark:text-zinc-400'
                             }`}
                         >
-                          <option value="new">🆕 NEW REQUEST</option>
-                          <option value="confirmed">✅ CONFIRMED</option>
-                          <option value="assigned">👤 ASSIGNED</option>
-                          <option value="completed">🏆 COMPLETED</option>
-                          <option value="cancelled">❌ CANCELLED</option>
+                          <option value="new">NEW REQUEST</option>
+                          <option value="confirmed">CONFIRMED</option>
+                          <option value="assigned">ASSIGNED</option>
+                          <option value="completed">COMPLETED</option>
+                          <option value="cancelled">CANCELLED</option>
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-600">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-600">
                           <svg className="h-3 w-3 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
                         </div>
                       </div>

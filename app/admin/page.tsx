@@ -62,9 +62,9 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="mb-8 border-b border-slate-400/20 pb-6">
-        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Dashboard</h1>
-        <p className="text-slate-400 text-lg">
+      <div className="mb-8 border-b border-zinc-400/20 pb-6">
+        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Dashboard</h1>
+        <p className="text-zinc-600 dark:text-zinc-400 text-lg">
           High-level overview of your Crewlink usage.
         </p>
       </div>
@@ -90,14 +90,14 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent bookings placeholder */}
-      <section className="bg-slate-800/30 rounded-xl p-8 border border-slate-400/10">
-        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+      <section className="bg-zinc-200/30 dark:bg-zinc-800/30 rounded-xl p-8 border border-zinc-400/10">
+        <h2 className="text-xl font-semibold text-zinc-900 dark:text-white mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
           Recent bookings
         </h2>
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <div className="text-4xl mb-4 opacity-20">📅</div>
-          <p className="text-slate-500 text-base">No bookings found yet. Keep up the good work!</p>
+          <p className="text-zinc-500 dark:text-zinc-500 text-base">No bookings found yet. Keep up the good work!</p>
         </div>
       </section>
     </div>

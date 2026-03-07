@@ -7,6 +7,8 @@ type Business = {
   id: string;
   slug: string;
   name: string;
+  industry: string | null;
+  onboarded: boolean;
 };
 
 type BusinessContextType = {
@@ -47,10 +49,27 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
+      // Attempt to fetch with new metadata fields
+      let { data, error } = await supabase
         .from("businesses")
-        .select("id, slug, name")
+        .select("id, slug, name, industry, onboarded")
         .order("name", { ascending: true });
+
+      // Fallback: If the migration hasn't been run yet, fetch without the new fields
+      if (error) {
+        console.warn("Retrying fetch without industry/onboarded fields (migration might be missing)", error.message);
+        const fallbackRes = await supabase
+          .from("businesses")
+          .select("id, slug, name")
+          .order("name", { ascending: true });
+
+        data = (fallbackRes.data || []).map(b => ({
+          ...b,
+          industry: null,
+          onboarded: true
+        })) as any;
+        error = fallbackRes.error;
+      }
 
       if (error) {
         console.error("Error loading businesses", error);
@@ -59,7 +78,10 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const bizList = (data || []) as Business[];
+      const bizList = (data || []).map(b => ({
+        ...b,
+        onboarded: b.onboarded ?? true // Default to true if column missing to avoid wizard loop
+      })) as Business[];
       setBusinesses(bizList);
 
       let savedId: string | null = null;

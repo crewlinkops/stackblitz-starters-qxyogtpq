@@ -50,26 +50,25 @@ export default function OutreachPage() {
 
     return (
         <div className="max-w-4xl mx-auto py-8 px-4">
-            <header className="mb-10 text-center sm:text-left border-b border-slate-400/10 pb-8">
-                <h1 className="text-3xl font-bold text-white tracking-tight mb-3">SMS Outreach</h1>
-                <p className="text-slate-400 text-lg max-w-2xl">
+            <header className="mb-10 text-center sm:text-left border-b border-zinc-400/10 pb-8">
+                <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-3">SMS Outreach</h1>
+                <p className="text-zinc-600 dark:text-zinc-400 text-lg max-w-2xl">
                     Provide a specialized link to let customers describe their issue before picking a time. They&apos;ll be guided through a full booking wizard.
                 </p>
             </header>
 
             <div className="group relative mb-12">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/20 to-emerald-500/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000"></div>
-                <div className="relative bg-slate-900/80 rounded-2xl p-6 sm:p-10 backdrop-blur-xl border border-white/10 shadow-2xl">
+                <div className="relative bg-zinc-100/80 dark:bg-zinc-900/80 rounded-2xl p-6 sm:p-10 backdrop-blur-xl border border-zinc-200 dark:border-white/10 shadow-xl dark:shadow-2xl">
                     <div className="max-w-md mx-auto sm:mx-0">
                         <div className="space-y-6">
                             <div className="space-y-2">
-                                <label className="block text-sm font-medium text-slate-400 ml-1 uppercase tracking-wider">
+                                <label className="block text-sm font-medium text-zinc-600 dark:text-zinc-400 ml-1 uppercase tracking-wider">
                                     Customer Phone Number
                                 </label>
                                 <input
                                     type="tel"
                                     placeholder="+1 (555) 000-0000"
-                                    className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-lg placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                                    className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-4 text-zinc-900 dark:text-white text-lg placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all"
                                     value={phone}
                                     onChange={(e) => setPhone(e.target.value)}
                                 />
@@ -79,10 +78,10 @@ export default function OutreachPage() {
                                 <button
                                     onClick={() => handleSendLink("direct")}
                                     disabled={sending}
-                                    className="flex items-center justify-center gap-2 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center justify-center gap-2 py-4 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {sending ? (
-                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        <div className="w-5 h-5 border-2 border-zinc-200 dark:border-white/20 border-t-white rounded-full animate-spin"></div>
                                     ) : (
                                         <span>Send Direct Link</span>
                                     )}
@@ -90,10 +89,10 @@ export default function OutreachPage() {
                                 <button
                                     onClick={() => handleSendLink("wizard")}
                                     disabled={sending}
-                                    className="flex items-center justify-center gap-2 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex items-center justify-center gap-2 py-4 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {sending ? (
-                                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                        <div className="w-5 h-5 border-2 border-zinc-200 dark:border-white/20 border-t-white rounded-full animate-spin"></div>
                                     ) : (
                                         <span>Send Wizard Link</span>
                                     )}
@@ -102,11 +101,10 @@ export default function OutreachPage() {
 
                             {result && (
                                 <div className={`p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 duration-300 ${result.success
-                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                    ? "bg-red-600/10 border-red-600/20 text-red-500"
                                     : "bg-red-500/10 border-red-500/20 text-red-400"
                                     }`}>
                                     <div className="flex items-center gap-3">
-                                        <span className="text-xl">{result.success ? "✅" : "⚠️"}</span>
                                         <p className="font-medium">{result.message}</p>
                                     </div>
                                 </div>
@@ -117,21 +115,21 @@ export default function OutreachPage() {
             </div>
 
             <section className="space-y-6">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                    <span className="w-2 h-2 bg-red-600 rounded-full"></span>
                     Preview Messages
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="bg-slate-800/40 rounded-2xl p-6 border border-white/5 shadow-sm hover:border-blue-500/30 transition-colors">
-                        <div className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-3">Direct Link Flow</div>
-                        <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 italic text-slate-300 leading-relaxed">
-                            &quot;Hi! You can book your appointment with us directly here: [Origin]/b/{currentBusiness.slug}&quot;
+                    <div className="bg-zinc-200/40 dark:bg-zinc-800/40 rounded-2xl p-6 border border-zinc-200 dark:border-white/5 shadow-sm hover:border-red-600/30 transition-colors">
+                        <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">Direct Link Flow</div>
+                        <div className="bg-zinc-100/50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 italic text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                            &quot;Hi! You can book your appointment with us directly here: https://gocrewlink.com/b/{currentBusiness.slug}&quot;
                         </div>
                     </div>
-                    <div className="bg-slate-800/40 rounded-2xl p-6 border border-white/5 shadow-sm hover:border-emerald-500/30 transition-colors">
-                        <div className="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-3">Wizard Link Flow</div>
-                        <div className="bg-slate-900/50 p-4 rounded-xl border border-white/5 italic text-slate-300 leading-relaxed">
-                            &quot;Hi! Please use our service wizard to book your appointment: [Origin]/wizard/{currentBusiness.slug}&quot;
+                    <div className="bg-zinc-200/40 dark:bg-zinc-800/40 rounded-2xl p-6 border border-zinc-200 dark:border-white/5 shadow-sm hover:border-red-600/30 transition-colors">
+                        <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">Wizard Link Flow</div>
+                        <div className="bg-zinc-100/50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 italic text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                            &quot;Hi! Please use our service wizard to book your appointment: https://gocrewlink.com/wizard/{currentBusiness.slug}&quot;
                         </div>
                     </div>
                 </div>

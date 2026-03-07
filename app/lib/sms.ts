@@ -14,17 +14,32 @@ export async function sendSMS(to: string, body: string) {
         return { success: false, error: 'Credentials not configured' };
     }
 
+    // Basic sanitization: remove everything but digits and a leading '+'
+    let sanitizedTo = to.replace(/[^\d+]/g, '');
+    if (!sanitizedTo.startsWith('+')) {
+        // Assume US if no leading +
+        sanitizedTo = '+' + (sanitizedTo.startsWith('1') ? sanitizedTo : '1' + sanitizedTo);
+    }
+
+    console.log(`Attempting to send SMS to: ${sanitizedTo}`);
+
     try {
         const client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
         const message = await client.messages.create({
             body: body,
             from: TWILIO_PHONE_NUMBER,
-            to: to
+            to: sanitizedTo
         });
 
-        console.log('SMS sent successfully:', message.sid);
-        return { success: true, sid: message.sid };
+        console.log('SMS request accepted by Twilio. SID:', message.sid);
+        console.log('Message Status:', message.status);
+        if (message.errorCode) {
+            console.warn(`Twilio Error Code: ${message.errorCode}`);
+            console.warn(`Twilio Error Message: ${message.errorMessage}`);
+        }
+
+        return { success: true, sid: message.sid, status: message.status };
     } catch (error: any) {
         console.error('Error sending SMS via Twilio:', error);
         return { success: false, error: error.message };

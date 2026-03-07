@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
             }, { status: 500 });
         }
 
-        const redirectUrl = new URL(`/admin/scheduling?success=google_connected`, request.url);
+        const redirectUrl = new URL(`/admin/settings?success=google_connected`, request.url);
         if (redirectUrl.hostname === '0.0.0.0') {
             redirectUrl.hostname = 'localhost';
         }
