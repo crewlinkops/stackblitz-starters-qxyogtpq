@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://gocrewlink.com'),
   title: 'Crewlink | Modern Field Service Operations',
   description: 'Streamline your field service business with automated scheduling, SMS outreach, and unified calendar management on Crewlink.',
   openGraph: {
