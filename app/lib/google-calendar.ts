@@ -2,13 +2,21 @@ import { google } from "googleapis";
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "./env";
 import { supabase } from "@/app/lib/supabaseClient";
 
-const oauth2Client = new google.auth.OAuth2(
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URI
-);
+import { google } from "googleapis";
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "./env";
+import { supabase } from "@/app/lib/supabaseClient";
 
-export const getAuthUrl = (businessSlug: string) => {
+// Helper to get a fresh client every time - safer for serverless env vars
+const getOAuthClient = (customRedirectUri?: string) => {
+  return new google.auth.OAuth2(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    customRedirectUri || GOOGLE_REDIRECT_URI
+  );
+};
+
+export const getAuthUrl = (businessSlug: string, customRedirectUri?: string) => {
+  const oauth2Client = getOAuthClient(customRedirectUri);
   const scopes = [
     "https://www.googleapis.com/auth/calendar",
     "https://www.googleapis.com/auth/calendar.events",
@@ -17,8 +25,8 @@ export const getAuthUrl = (businessSlug: string) => {
   return oauth2Client.generateAuthUrl({
     access_type: "offline",
     scope: scopes,
-    state: businessSlug, // Pass business slug as state to associate tokens on callback
-    prompt: "consent", // Force consent to ensure we get a refresh token
+    state: businessSlug,
+    prompt: "consent",
   });
 };
 
@@ -52,18 +60,15 @@ export const createEvent = async (
 
     if (!tokens) {
       console.warn(`No Google tokens found for business: ${businessSlug}`);
-      // Non-blocking warning
       return { success: false, error: "No tokens found" };
     }
 
+    const oauth2Client = getOAuthClient();
     oauth2Client.setCredentials({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
       expiry_date: tokens.expiry_date,
     });
-
-    // Check if basic refresh is needed (client handles this but good to be explicit if expiry is close)
-    // oauth2Client automatically refreshes if refresh_token is present
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
@@ -76,10 +81,10 @@ export const createEvent = async (
 
   } catch (error: any) {
     console.error("Failed to create Google Calendar event:", error);
-    // Non-blocking error
     return { success: false, error: error.message };
   }
 };
+
 export const listEvents = async (businessSlug: string, timeMin?: string) => {
   try {
     const tokens = await getTokens(businessSlug);
@@ -88,6 +93,7 @@ export const listEvents = async (businessSlug: string, timeMin?: string) => {
       return { success: false, error: "No tokens found" };
     }
 
+    const oauth2Client = getOAuthClient();
     oauth2Client.setCredentials({
       access_token: tokens.access_token,
       refresh_token: tokens.refresh_token,
