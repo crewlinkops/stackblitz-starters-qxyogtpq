@@ -206,7 +206,7 @@ export default function SchedulingAdminPage() {
       <header className="mb-10 text-center sm:text-left border-b border-zinc-200 dark:border-white/5 pb-8">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Scheduling Settings</h1>
         <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-          Configure <span className="text-red-600 font-bold">{currentBusiness?.name}</span>'s business hours and sync with external calendars.
+          Configure <span className="text-red-600 font-bold">{currentBusiness?.name}</span>&apos;s business hours and sync with external calendars.
         </p>
       </header>
 
