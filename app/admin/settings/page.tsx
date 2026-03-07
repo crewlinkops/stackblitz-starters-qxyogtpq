@@ -88,7 +88,7 @@ export default function SchedulingAdminPage() {
   const loadGoogleEvents = async (slug: string) => {
     setGoogleLoading(true);
     try {
-      const resp = await fetch(`/api/google-calendar/events/list?slug=${slug}`);
+      const resp = await fetch(`/api/google-calendar/events?slug=${slug}`);
       const data = await resp.json();
       if (data.events) {
         setGoogleEvents(data.events);

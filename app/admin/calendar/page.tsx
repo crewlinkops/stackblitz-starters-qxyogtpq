@@ -68,7 +68,7 @@ export default function CalendarAdminPage() {
 
             // 3. If connected, fetch Google Events
             if (tokenData) {
-                const resp = await fetch(`/api/google-calendar/events/list?slug=${currentBusiness.slug}`);
+                const resp = await fetch(`/api/google-calendar/events?slug=${currentBusiness.slug}`);
                 const googleData = await resp.json();
 
                 if (googleData.events) {

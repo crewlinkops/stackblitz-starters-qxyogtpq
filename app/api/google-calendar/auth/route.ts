@@ -6,10 +6,14 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const businessSlug = searchParams.get("slug");
 
+    const origin = request.headers.get("origin") || request.headers.get("referer") || "https://gocrewlink.com";
+    const dynamicRedirectUri = `${new URL(origin).origin}/api/google-calendar/callback`;
+
     console.log("OAuth Redirect Triggered:", {
         businessSlug,
+        origin,
+        dynamicRedirectUri,
         hasClientId: !!GOOGLE_CLIENT_ID,
-        clientIdPrefix: GOOGLE_CLIENT_ID ? GOOGLE_CLIENT_ID.substring(0, 10) : "missing"
     });
 
     if (!businessSlug) {
@@ -23,8 +27,8 @@ export async function GET(request: NextRequest) {
         }, { status: 500 });
     }
 
-    const url = getAuthUrl(businessSlug);
+    // Pass the dynamic redirect URI to the auth URL generator
+    const url = getAuthUrl(businessSlug, dynamicRedirectUri);
 
-    // Redirect the user to Google's consent page
     return NextResponse.redirect(url);
 }
