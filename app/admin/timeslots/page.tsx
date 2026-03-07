@@ -215,277 +215,197 @@ export default function TimeSlotsAdminPage() {
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <main style={{ display: "flex", gap: 32 }}>
-      {/* Left: form */}
-      <section style={{ flex: "0 0 360px" }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>
-          Time Slots
-        </h1>
-        <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>
+    <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <header className="mb-10 border-b border-white/5 pb-8">
+        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Availability Control</h1>
+        <p className="text-slate-400">
           {currentBusiness
-            ? `Managing availability for: ${currentBusiness.name}`
-            : "Select a business in the sidebar to manage time slots."}
+            ? `Managing inventory for ${currentBusiness.name}`
+            : "Select a business to configure operational windows."}
         </p>
+      </header>
 
-        {error && (
-          <div
-            style={{
-              marginBottom: 12,
-              padding: "8px 10px",
-              backgroundColor: "#fee2e2",
-              color: "#b91c1c",
-              fontSize: 13,
-              borderRadius: 6,
-            }}
-          >
-            {error}
-          </div>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left: Provisioning Form */}
+        <section className="lg:col-span-4">
+          <div className="bg-slate-900/50 rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-2xl sticky top-8">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <span className="text-emerald-500">📅</span>
+              Provision Window
+            </h2>
 
-        <form
-          onSubmit={handleCreate}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            padding: 16,
-            borderRadius: 8,
-            border: "1px solid #374151",
-            backgroundColor: "#020617",
-          }}
-        >
-          <div>
-            <label
-              htmlFor="slot-start"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              Start time
-            </label>
-            <input
-              id="slot-start"
-              type="datetime-local"
-              value={newStart}
-              onChange={(e) => setNewStart(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-              }}
-            />
-          </div>
+            {error && (
+              <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-in fade-in slide-in-from-top-2">
+                {error}
+              </div>
+            )}
 
-          <div>
-            <label
-              htmlFor="slot-end"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              End time
-            </label>
-            <input
-              id="slot-end"
-              type="datetime-local"
-              value={newEnd}
-              onChange={(e) => setNewEnd(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-              }}
-            />
-          </div>
+            <form onSubmit={handleCreate} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="slot-start" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Start Boundary
+                </label>
+                <input
+                  id="slot-start"
+                  type="datetime-local"
+                  value={newStart}
+                  onChange={(e) => setNewStart(e.target.value)}
+                  className="w-full bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all font-medium"
+                />
+              </div>
 
-          <div>
-            <label
-              htmlFor="slot-tech"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              Technician (optional)
-            </label>
-            <select
-              id="slot-tech"
-              value={newTechnicianId}
-              onChange={(e) => setNewTechnicianId(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-              }}
-            >
-              <option value="">Unassigned</option>
-              {technicians.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name || `Technician #${t.id}`}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div className="space-y-2">
+                <label htmlFor="slot-end" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  End Boundary
+                </label>
+                <input
+                  id="slot-end"
+                  type="datetime-local"
+                  value={newEnd}
+                  onChange={(e) => setNewEnd(e.target.value)}
+                  className="w-full bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all font-medium"
+                />
+              </div>
 
-          <div>
-            <label
-              htmlFor="slot-status"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              Status
-            </label>
-            <select
-              id="slot-status"
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-              }}
-            >
-              {STATUS_OPTIONS.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="submit"
-            disabled={saving || !currentBusiness}
-            style={{
-              marginTop: 8,
-              padding: "6px 12px",
-              borderRadius: 6,
-              border: "none",
-              backgroundColor: "#22c55e",
-              color: "#020617",
-              fontSize: 13,
-              cursor: saving || !currentBusiness ? "default" : "pointer",
-              opacity: saving || !currentBusiness ? 0.7 : 1,
-            }}
-          >
-            Create time slot
-          </button>
-        </form>
-      </section>
-
-      {/* Right: list */}
-      <section style={{ flex: 1 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-          Existing time slots
-        </h2>
-
-        {loading ? (
-          <p style={{ fontSize: 13, color: "#9ca3af" }}>Loading time slots…</p>
-        ) : timeSlots.length === 0 ? (
-          <p style={{ fontSize: 13, color: "#9ca3af" }}>
-            No time slots found for this business.
-          </p>
-        ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: 13,
-            }}
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
+              <div className="space-y-2">
+                <label htmlFor="slot-tech" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Assignee
+                </label>
+                <select
+                  id="slot-tech"
+                  value={newTechnicianId}
+                  onChange={(e) => setNewTechnicianId(e.target.value)}
+                  className="w-full bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition-all font-medium appearance-none cursor-pointer"
                 >
-                  Start
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  End
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Technician
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Status
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {timeSlots.map((slot) => (
-                <tr key={slot.id}>
-                  <td style={{ padding: "6px 8px" }}>
-                    {formatDisplay(slot.start_time)}
-                  </td>
-                  <td style={{ padding: "6px 8px" }}>
-                    {formatDisplay(slot.end_time)}
-                  </td>
-                  <td style={{ padding: "6px 8px" }}>
-                    {technicianNameFor(slot.technician_id)}
-                  </td>
-                  <td style={{ padding: "6px 8px" }}>{slot.status}</td>
-                  <td style={{ padding: "6px 8px" }}>
+                  <option value="">Unassigned Pool</option>
+                  {technicians.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name || `Member #${t.id}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="slot-status" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Initial State
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {STATUS_OPTIONS.map((s) => (
                     <button
+                      key={s}
                       type="button"
-                      onClick={() => handleDelete(slot)}
-                      disabled={saving}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        border: "none",
-                        backgroundColor: "#ef4444",
-                        color: "#f9fafb",
-                        cursor: saving ? "default" : "pointer",
-                      }}
+                      onClick={() => setNewStatus(s)}
+                      className={`py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg border transition-all ${newStatus === s
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
+                        : 'bg-slate-800/40 border-slate-700 text-slate-500'
+                        }`}
                     >
-                      Delete
+                      {s}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={saving || !currentBusiness}
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                  "Create Interval"
+                )}
+              </button>
+            </form>
+          </div>
+        </section>
+
+        {/* Right: Intervals List */}
+        <section className="lg:col-span-8">
+          <div className="bg-slate-900/30 rounded-3xl border border-white/5 p-6 backdrop-blur-sm shadow-sm overflow-hidden border-t-4 border-t-emerald-500/20">
+            <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+              <span className="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+              Timeline Overview
+              <span className="ml-auto text-xs font-bold text-slate-600 bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5">
+                {timeSlots.length} Blocks
+              </span>
+            </h2>
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-24 space-y-4">
+                <div className="w-8 h-8 border-3 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
+                <p className="text-slate-500 font-medium italic">Mapping available windows...</p>
+              </div>
+            ) : timeSlots.length === 0 ? (
+              <div className="text-center py-24 bg-slate-950/20 rounded-3xl border border-dashed border-slate-800">
+                <div className="text-5xl mb-4 grayscale opacity-10">⏳</div>
+                <h3 className="text-lg font-bold text-slate-400 mb-1">Timeline is clear</h3>
+                <p className="text-slate-600 px-10">Define operational windows to populate the calendar.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto ring-1 ring-white/5 rounded-2xl shadow-sm">
+                <table className="min-w-full divide-y divide-white/5 bg-slate-900/40">
+                  <thead className="bg-slate-950/60">
+                    <tr>
+                      <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Boundary</th>
+                      <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Assignment</th>
+                      <th scope="col" className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">State</th>
+                      <th scope="col" className="px-6 py-5 text-right text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {timeSlots.map((slot) => (
+                      <tr key={slot.id} className="group hover:bg-white/5 transition-colors duration-300">
+                        <td className="px-6 py-5 whitespace-nowrap">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded bg-slate-800 border border-white/5">
+                              <svg className="w-3.5 h-3.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-white tracking-tight">
+                                {formatDisplay(slot.start_time).split(',')[1]}
+                              </span>
+                              <span className="text-[10px] text-slate-500 font-medium">
+                                {formatDisplay(slot.start_time).split(',')[0]}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/60 border border-white/5 text-[10px] font-bold text-slate-400">
+                            <span className="w-1 h-1 bg-blue-500 rounded-full"></span>
+                            {technicianNameFor(slot.technician_id)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`text-[10px] font-bold uppercase tracking-[0.1em] px-2 py-0.5 rounded-full border shadow-sm ${slot.status === 'open'
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500'
+                            : 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+                            }`}>
+                            {slot.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5 text-right">
+                          <button
+                            onClick={() => handleDelete(slot)}
+                            disabled={saving}
+                            className="p-2.5 rounded-xl bg-slate-900 border border-white/5 text-slate-500 hover:text-rose-500 hover:border-rose-500/30 transition-all opacity-0 group-hover:opacity-100"
+                            title="Purge Window"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
     </main>
   );
 }

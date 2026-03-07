@@ -33,6 +33,7 @@ export default function BookingPage({ params }: PageProps) {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
     null
   );
@@ -173,6 +174,7 @@ export default function BookingPage({ params }: PageProps) {
         business_slug: businessSlug,
         customer_name: customerName.trim(),
         customer_email: customerEmail.trim(),
+        customer_phone: customerPhone.trim(),
         service_id: selectedServiceId,
         preferred_time: slot.start_time,
         assigned_technician_id: slot.technician_id,
@@ -225,9 +227,9 @@ export default function BookingPage({ params }: PageProps) {
             },
             technician: shouldNotifyTech
               ? {
-                  name: slot.technician_name ?? undefined,
-                  email: slot.technician_email ?? undefined,
-                }
+                name: slot.technician_name ?? undefined,
+                email: slot.technician_email ?? undefined,
+              }
               : {},
             booking: {
               serviceName: selectedService.name,
@@ -246,10 +248,34 @@ export default function BookingPage({ params }: PageProps) {
       console.error("Unexpected error calling booking-email:", err);
     }
 
+    // 4) Trigger Google Calendar Sync (Non-blocking)
+    try {
+      fetch("/api/google-calendar/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: booking.id,
+          businessSlug: businessSlug,
+        }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.warning) {
+            console.warn("Google Calendar warning:", data.warning);
+          } else {
+            console.log("Google Calendar sync initiated");
+          }
+        })
+        .catch((err) => console.error("Google Calendar sync fetch error:", err));
+    } catch (err) {
+      console.error("Failed to trigger calendar sync:", err);
+    }
+
     // Remove that slot from local list & reset form
     setSlots((prev) => prev.filter((s) => s.id !== slot.id));
     setCustomerName("");
     setCustomerEmail("");
+    setCustomerPhone("");
     setSelectedServiceId(null);
     setSelectedSlotId(null);
     setMessage("Your booking has been requested!");
@@ -258,146 +284,207 @@ export default function BookingPage({ params }: PageProps) {
 
 
   return (
-    <main
-      style={{
-        maxWidth: "800px",
-        margin: "0 auto",
-        padding: "24px",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <h1>Booking – Business {businessSlug}</h1>
-
-      {loading && <p>Loading services and availability…</p>}
-
-      {!loading && error && (
-        <p style={{ color: "red", marginTop: "12px" }}>{error}</p>
-      )}
-      {!loading && message && (
-        <p style={{ color: "green", marginTop: "12px" }}>{message}</p>
-      )}
-
-      {!loading && calendlyUrl && (
-        <div>
-          <p>Schedule your appointment using our booking system below:</p>
-          <CalendlyWidget
-            calendlyUrl={calendlyUrl}
-            prefill={{
-              name: customerName || undefined,
-              email: customerEmail || undefined,
-            }}
-          />
-        </div>
-      )}
-
-      {!loading && !calendlyUrl && (
-        <>
-          <p>
-            Choose a service and one of the available appointment windows below.
-          </p>
-        <form onSubmit={handleSubmit} style={{ marginTop: "24px" }}>
-          <div style={{ marginBottom: "16px" }}>
-            <label>
-              Your name:
-              <br />
-              <input
-                style={{ width: "100%", padding: "8px" }}
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-              />
-            </label>
+    <main className="min-h-screen bg-slate-950 text-slate-200 font-sans selection:bg-blue-500/30">
+      <div className="max-w-3xl mx-auto px-4 py-12">
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl font-bold text-white tracking-tight mb-4">
+            Book an Appointment
+          </h1>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
+            <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+            {businessSlug}
           </div>
+        </header>
 
-          <div style={{ marginBottom: "16px" }}>
-            <label>
-              Your email:
-              <br />
-              <input
-                type="email"
-                style={{ width: "100%", padding: "8px" }}
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                placeholder="you@example.com"
-              />
-            </label>
+        {loading && (
+          <div className="flex flex-col items-center justify-center py-20">
+            <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mb-4"></div>
+            <p className="text-slate-400 animate-pulse">Checking availability...</p>
           </div>
+        )}
 
-          <div style={{ marginBottom: "16px" }}>
-            <label>
-              Service:
-              <br />
-              <select
-                style={{ width: "100%", padding: "8px" }}
-                value={selectedServiceId ?? ""}
-                onChange={(e) =>
-                  setSelectedServiceId(
-                    e.target.value ? Number(e.target.value) : null
-                  )
-                }
-              >
-                <option value="">Select a service</option>
-                {services.map((svc) => (
-                  <option key={svc.id} value={svc.id}>
-                    {svc.name}
-                    {svc.duration_min ? ` (${svc.duration_min} min)` : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
+        {!loading && error && (
+          <div className="mb-8 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center gap-3">
+            <span className="text-xl">⚠️</span>
+            <p>{error}</p>
           </div>
+        )}
 
-          <div style={{ marginBottom: "16px" }}>
-            <label>Available time windows:</label>
-            <br />
-            {slots.length === 0 ? (
-              <p>No open time slots right now.</p>
-            ) : (
-              <div
-                style={{
-                  marginTop: "8px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                }}
-              >
-                {slots.map((slot) => (
-                  <label
-                    key={slot.id}
-                    style={{
-                      border: "1px solid #ccc",
-                      borderRadius: "6px",
-                      padding: "8px",
-                      cursor: "pointer",
-                    }}
-                  >
+        {!loading && message && (
+          <div className="mb-8 p-8 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-center">
+            <div className="text-5xl mb-4">✅</div>
+            <h2 className="text-2xl font-bold mb-2">Booking Requested!</h2>
+            <p>{message}</p>
+            <button
+              onClick={() => setMessage(null)}
+              className="mt-6 px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-colors"
+            >
+              Book another
+            </button>
+          </div>
+        )}
+
+        {!loading && !message && calendlyUrl && (
+          <div className="rounded-2xl border border-slate-400/10 bg-slate-900/50 p-6 backdrop-blur-sm shadow-2xl">
+            <p className="text-slate-400 mb-6 text-center italic">
+              Schedule your appointment using our secure booking system below:
+            </p>
+            <CalendlyWidget
+              calendlyUrl={calendlyUrl}
+              prefill={{
+                name: customerName || undefined,
+                email: customerEmail || undefined,
+              }}
+            />
+          </div>
+        )}
+
+        {!loading && !message && !calendlyUrl && (
+          <div className="space-y-8">
+            <div className="p-1 rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-500/20">
+              <div className="bg-slate-900/90 rounded-[calc(1rem-4px)] p-6 sm:p-10 backdrop-blur-xl border border-white/5 shadow-2xl">
+                <p className="text-slate-400 mb-8 text-center sm:text-lg">
+                  Choose a service and select an available time window that works best for you.
+                </p>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="block text-sm font-medium text-slate-400 ml-1">
+                        Full Name
+                      </label>
+                      <input
+                        id="name"
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="John Doe"
+                        required
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="email" className="block text-sm font-medium text-slate-400 ml-1">
+                        Email Address
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                        value={customerEmail}
+                        onChange={(e) => setCustomerEmail(e.target.value)}
+                        placeholder="john@example.com"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="block text-sm font-medium text-slate-400 ml-1">
+                      Phone Number (for SMS confirmation)
+                    </label>
                     <input
-                      type="radio"
-                      name="slot"
-                      value={slot.id}
-                      checked={selectedSlotId === slot.id}
-                      onChange={() => setSelectedSlotId(slot.id)}
-                      style={{ marginRight: "8px" }}
+                      id="phone"
+                      type="tel"
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="+1 (555) 000-0000"
                     />
-                    {formatTimeRange(slot.start_time, slot.end_time)}
-                    {slot.technician_name && (
-                      <span> — Tech: {slot.technician_name}</span>
-                    )}
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
+                  </div>
 
-          <button
-            type="submit"
-            disabled={submitting || slots.length === 0}
-            style={{ padding: "8px 16px", cursor: "pointer" }}
-          >
-            {submitting ? "Submitting…" : "Request booking"}
-          </button>
-        </form>
-        </>
-      )}
+                  <div className="space-y-2">
+                    <label htmlFor="service" className="block text-sm font-medium text-slate-400 ml-1">
+                      Select Service
+                    </label>
+                    <select
+                      id="service"
+                      className="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all appearance-none cursor-pointer"
+                      value={selectedServiceId ?? ""}
+                      onChange={(e) =>
+                        setSelectedServiceId(
+                          e.target.value ? Number(e.target.value) : null
+                        )
+                      }
+                      required
+                    >
+                      <option value="" className="bg-slate-900">Choose a service...</option>
+                      {services.map((svc) => (
+                        <option key={svc.id} value={svc.id} className="bg-slate-900">
+                          {svc.name}
+                          {svc.duration_min ? ` (${svc.duration_min} min)` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="block text-sm font-medium text-slate-400 ml-1">
+                      Available Appointments
+                    </label>
+                    {slots.length === 0 ? (
+                      <div className="p-8 rounded-xl border border-dashed border-slate-700 text-center">
+                        <p className="text-slate-500">No open time slots right now. Please check back later.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                        {slots.map((slot) => (
+                          <label
+                            key={slot.id}
+                            className={`flex items-center gap-4 p-4 rounded-xl border transition-all cursor-pointer ${selectedSlotId === slot.id
+                              ? "bg-blue-600/20 border-blue-500/50 ring-1 ring-blue-500/50 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                              : "bg-slate-800/30 border-slate-700 hover:border-slate-600"
+                              }`}
+                          >
+                            <input
+                              type="radio"
+                              name="slot"
+                              className="hidden"
+                              value={slot.id}
+                              checked={selectedSlotId === slot.id}
+                              onChange={() => setSelectedSlotId(slot.id)}
+                            />
+                            <div className="flex-1">
+                              <div className="text-white font-medium">
+                                {formatTimeRange(slot.start_time, slot.end_time)}
+                              </div>
+                              {slot.technician_name && (
+                                <div className="text-xs text-slate-500 mt-0.5">
+                                  With {slot.technician_name}
+                                </div>
+                              )}
+                            </div>
+                            {selectedSlotId === slot.id && (
+                              <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-[10px] text-white">
+                                ✓
+                              </div>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={submitting || slots.length === 0}
+                    className="w-full mt-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
+                  >
+                    {submitting ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                        <span>Processing...</span>
+                      </>
+                    ) : (
+                      "Confirm Your Booking"
+                    )}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

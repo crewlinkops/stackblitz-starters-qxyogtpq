@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../supabaseClient";
+import { supabase } from "@/app/lib/supabaseClient";
+import StatCard from "../components/StatCard";
 
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -60,21 +61,16 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <div>
-      <h1 style={{ fontSize: "24px", marginBottom: "8px" }}>Dashboard</h1>
-      <p style={{ color: "#555", marginBottom: "24px" }}>
-        High-level overview of your Crewlink usage.
-      </p>
+    <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="mb-8 border-b border-slate-400/20 pb-6">
+        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Dashboard</h1>
+        <p className="text-slate-400 text-lg">
+          High-level overview of your Crewlink usage.
+        </p>
+      </div>
 
       {/* Stats cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: "16px",
-          marginBottom: "32px",
-        }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <StatCard
           label="Total bookings"
           value={loading ? "…" : totalBookings}
@@ -94,30 +90,17 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent bookings placeholder */}
-      <section>
-        <h2 style={{ fontSize: "18px", marginBottom: "12px" }}>
+      <section className="bg-slate-800/30 rounded-xl p-8 border border-slate-400/10">
+        <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
           Recent bookings
         </h2>
-        <p style={{ color: "#777", fontSize: "14px" }}>No bookings yet.</p>
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="text-4xl mb-4 opacity-20">📅</div>
+          <p className="text-slate-500 text-base">No bookings found yet. Keep up the good work!</p>
+        </div>
       </section>
     </div>
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number | string }) {
-  return (
-    <div
-      style={{
-        padding: "16px",
-        borderRadius: "8px",
-        border: "1px solid #ddd",
-        background: "#fafafa",
-      }}
-    >
-      <div style={{ fontSize: "13px", color: "#666", marginBottom: "4px" }}>
-        {label}
-      </div>
-      <div style={{ fontSize: "22px", fontWeight: 600 }}>{value}</div>
-    </div>
-  );
-}

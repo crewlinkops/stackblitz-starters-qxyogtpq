@@ -1,10 +1,15 @@
 // DO NOT commit these to a public GitHub repo later.
 // StackBlitz is sandboxed and safe for development only.
 
-export const SUPABASE_URL = "https://znfyliewyfutjjxntczh.supabase.co";
+export const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 
-export const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZnlsaWV3eWZ1dGpqeG50Y3poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwNzYzNTksImV4cCI6MjA3OTY1MjM1OX0.pmHVj-ttZYeU45292_wZI-PcNzrRMEJMwVhCDX_bTzE";
+export const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
-export const SUPABASE_SERVICE_ROLE_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpuZnlsaWV3eWZ1dGpqeG50Y3poIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDA3NjM1OSwiZXhwIjoyMDc5NjUyMzU5fQ.qO7eL61aglUVmk9TzKjNrrIc9sfXw_aoXcliW04Pu-4";
+export const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+
+export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+export const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3001/api/google-calendar/callback';
+export const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
+export const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
+export const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';

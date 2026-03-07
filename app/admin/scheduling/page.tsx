@@ -23,6 +23,10 @@ export default function SchedulingAdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [googleEvents, setGoogleEvents] = useState<any[]>([]);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
   const loadSettings = async () => {
     if (!businessSlug.trim()) {
       setError("Enter a business slug first.");
@@ -62,6 +66,37 @@ export default function SchedulingAdminPage() {
     }
 
     setLoading(false);
+    checkGoogleConnection(businessSlug.trim());
+  };
+
+  const checkGoogleConnection = async (slug: string) => {
+    const { data } = await supabase
+      .from("google_tokens")
+      .select("business_slug")
+      .eq("business_slug", slug)
+      .maybeSingle();
+
+    setGoogleConnected(!!data);
+    if (data) {
+      loadGoogleEvents(slug);
+    } else {
+      setGoogleEvents([]);
+    }
+  };
+
+  const loadGoogleEvents = async (slug: string) => {
+    setGoogleLoading(true);
+    try {
+      const resp = await fetch(`/api/google-calendar/events/list?slug=${slug}`);
+      const data = await resp.json();
+      if (data.events) {
+        setGoogleEvents(data.events);
+      }
+    } catch (err) {
+      console.error("Failed to load events", err);
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -135,163 +170,226 @@ export default function SchedulingAdminPage() {
     t ? (t.length === 5 ? t + ":00" : t) : null;
 
   return (
-    <main
-      style={{
-        maxWidth: "700px",
-        margin: "0 auto",
-        padding: "24px",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <h1 style={{ fontSize: "24px", fontWeight: "bold", marginBottom: "16px" }}>
-        Admin – Scheduling Settings
-      </h1>
+    <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
+      <header className="mb-10 text-center sm:text-left border-b border-white/5 pb-8">
+        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Scheduling Settings</h1>
+        <p className="text-slate-400 text-lg">
+          Configure your business hours and sync with external calendars.
+        </p>
+      </header>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      {message && <p style={{ color: "green" }}>{message}</p>}
+      {/* Google Calendar Integration Card */}
+      <section className="mb-10">
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 to-indigo-500/20 rounded-2xl blur opacity-75"></div>
+          <div className="relative bg-slate-900/80 rounded-2xl p-6 sm:p-8 backdrop-blur-xl border border-white/10 shadow-2xl">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
+              <div className="space-y-1">
+                <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/10 rounded-lg">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                      <line x1="16" y1="2" x2="16" y2="6"></line>
+                      <line x1="8" y1="2" x2="8" y2="6"></line>
+                      <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                  </div>
+                  Google Calendar
+                </h2>
+                <p className="text-slate-400 text-sm">
+                  {googleConnected
+                    ? "Your Crewlink bookings are automatically synced to Gmail."
+                    : "Connect your Google Calendar to sync bookings as events."}
+                </p>
+              </div>
 
-      <section
-        style={{
-          border: "1px solid #ddd",
-          borderRadius: "8px",
-          padding: "12px",
-          marginBottom: "16px",
-        }}
-      >
-        <label>
-          Business slug:&nbsp;
+              {googleConnected ? (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                  Connected
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    if (!record?.business_slug) return;
+                    window.location.href = `/api/google-calendar/auth?slug=${record.business_slug}`;
+                  }}
+                  disabled={!record}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 18 18" fill="currentColor">
+                    <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
+                    <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" />
+                    <path d="M3.964 10.712A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.712V4.956H.957A8.996 8.996 0 0 0 0 9c0 1.45.345 2.817.957 4.044l3.007-2.332z" />
+                    <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.582C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.956L3.964 7.288c.708-2.127 2.692-3.71 5.036-3.71z" />
+                  </svg>
+                  Sync Calendar
+                </button>
+              )}
+            </div>
+
+            {googleConnected && (
+              <div className="bg-slate-950/50 rounded-xl border border-white/5 p-4 sm:p-6 overflow-hidden">
+                <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Upcoming Schedule</h3>
+                {googleLoading ? (
+                  <div className="flex items-center gap-3 text-slate-400 text-sm animate-pulse">
+                    <div className="w-4 h-4 border-2 border-blue-500/20 border-t-blue-500 rounded-full animate-spin"></div>
+                    Refreshing events...
+                  </div>
+                ) : googleEvents.length === 0 ? (
+                  <p className="text-slate-500 text-sm italic py-4 text-center">No upcoming events found.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {googleEvents.slice(0, 5).map((ev: any) => (
+                      <div key={ev.id} className="flex items-center justify-between p-3 bg-slate-800/40 rounded-lg border border-white/5">
+                        <span className="text-sm font-medium text-slate-200 truncate pr-4">{ev.summary}</span>
+                        <span className="text-xs font-bold text-slate-500 whitespace-nowrap bg-slate-900/80 px-2 py-1 rounded border border-white/5">
+                          {new Date(ev.start.dateTime || ev.start.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    const confirmed = window.confirm("Disconnect Google Calendar? Future bookings will no longer sync.");
+                    if (confirmed) setGoogleConnected(false);
+                  }}
+                  className="mt-6 text-[10px] font-bold text-rose-500/60 uppercase tracking-widest hover:text-rose-400 transition-colors"
+                >
+                  Disconnect Integration
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Main Settings Form */}
+      <section className="space-y-8">
+        {(error || message) && (
+          <div className={`p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 ${error ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+            }`}>
+            <div className="flex items-center gap-3 font-medium text-sm italic">
+              <span>{error ? "⚠️" : "✅"}</span>
+              <p>{error || message}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Slug Switcher (Utility) */}
+        <div className="bg-slate-900/40 rounded-2xl border border-white/5 p-4 flex items-center gap-4">
           <input
             value={businessSlug}
             onChange={(e) => setBusinessSlug(e.target.value)}
-            style={{ padding: "4px 8px" }}
+            className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-slate-300 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+            placeholder="Business slug..."
           />
-        </label>
-        <button
-          type="button"
-          onClick={loadSettings}
-          style={{ marginLeft: "8px", padding: "4px 10px", cursor: "pointer" }}
-        >
-          Load
-        </button>
-      </section>
-
-      {loading && <p>Loading settings…</p>}
-
-      {!loading && record && (
-        <form
-          onSubmit={handleSave}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: "8px",
-            padding: "12px",
-            display: "grid",
-            gap: "10px",
-          }}
-        >
-          <label>
-            Business slug:
-            <br />
-            <input
-              style={{ width: "100%", padding: "6px" }}
-              value={record.business_slug}
-              onChange={(e) =>
-                handleChange("business_slug", e.target.value)
-              }
-            />
-          </label>
-
-          <label>
-            Work day start (HH:MM):
-            <br />
-            <input
-              type="time"
-              style={{ width: "100%", padding: "6px" }}
-              value={toTimeInput(record.work_start)}
-              onChange={(e) =>
-                handleChange("work_start", fromTimeInput(e.target.value))
-              }
-            />
-          </label>
-
-          <label>
-            Work day end (HH:MM):
-            <br />
-            <input
-              type="time"
-              style={{ width: "100%", padding: "6px" }}
-              value={toTimeInput(record.work_end)}
-              onChange={(e) =>
-                handleChange("work_end", fromTimeInput(e.target.value))
-              }
-            />
-          </label>
-
-          <label>
-            Lunch start (HH:MM, optional):
-            <br />
-            <input
-              type="time"
-              style={{ width: "100%", padding: "6px" }}
-              value={toTimeInput(record.lunch_start)}
-              onChange={(e) =>
-                handleChange("lunch_start", fromTimeInput(e.target.value))
-              }
-            />
-          </label>
-
-          <label>
-            Lunch end (HH:MM, optional):
-            <br />
-            <input
-              type="time"
-              style={{ width: "100%", padding: "6px" }}
-              value={toTimeInput(record.lunch_end)}
-              onChange={(e) =>
-                handleChange("lunch_end", fromTimeInput(e.target.value))
-              }
-            />
-          </label>
-
-          <label>
-            Slot duration (minutes):
-            <br />
-            <input
-              type="number"
-              style={{ width: "100%", padding: "6px" }}
-              value={record.slot_duration_min}
-              onChange={(e) =>
-                handleChange("slot_duration_min", Number(e.target.value) || 0)
-              }
-            />
-          </label>
-
-          <label>
-            Buffer between slots (minutes):
-            <br />
-            <input
-              type="number"
-              style={{ width: "100%", padding: "6px" }}
-              value={record.buffer_min}
-              onChange={(e) =>
-                handleChange("buffer_min", Number(e.target.value) || 0)
-              }
-            />
-          </label>
-
           <button
-            type="submit"
-            disabled={saving}
-            style={{
-              padding: "8px 12px",
-              marginTop: "8px",
-              cursor: "pointer",
-              alignSelf: "flex-start",
-            }}
+            onClick={loadSettings}
+            className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-xl transition-all border border-white/5"
           >
-            {saving ? "Saving…" : "Save settings"}
+            Load Settings
           </button>
-        </form>
-      )}
+        </div>
+
+        {loading ? (
+          <div className="py-20 text-center text-slate-500 animate-pulse font-medium italic">
+            Synchronizing profile settings...
+          </div>
+        ) : record && (
+          <form onSubmit={handleSave} className="bg-slate-900/30 rounded-3xl border border-white/5 p-6 sm:p-10 space-y-10 shadow-sm backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Core Hours */}
+              <div className="space-y-6">
+                <h3 className="text-sm font-bold text-blue-500 uppercase tracking-widest pl-1">Operation Hours</h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Work Start</label>
+                    <input
+                      type="time"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium"
+                      value={toTimeInput(record.work_start)}
+                      onChange={(e) => handleChange("work_start", fromTimeInput(e.target.value))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Work End</label>
+                    <input
+                      type="time"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium"
+                      value={toTimeInput(record.work_end)}
+                      onChange={(e) => handleChange("work_end", fromTimeInput(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Break Times */}
+              <div className="space-y-6">
+                <h3 className="text-sm font-bold text-indigo-500 uppercase tracking-widest pl-1">Break Times</h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Lunch Start</label>
+                    <input
+                      type="time"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-medium"
+                      value={toTimeInput(record.lunch_start)}
+                      onChange={(e) => handleChange("lunch_start", fromTimeInput(e.target.value))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Lunch End</label>
+                    <input
+                      type="time"
+                      className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all font-medium"
+                      value={toTimeInput(record.lunch_end)}
+                      onChange={(e) => handleChange("lunch_end", fromTimeInput(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Durations */}
+            <div className="pt-8 border-t border-white/5">
+              <h3 className="text-sm font-bold text-emerald-500 uppercase tracking-widest pl-1 mb-6">Booking Intervals</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Slot Duration (Min)</label>
+                  <input
+                    type="number"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all font-medium"
+                    value={record.slot_duration_min}
+                    onChange={(e) => handleChange("slot_duration_min", Number(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">Buffer Time (Min)</label>
+                  <input
+                    type="number"
+                    className="w-full bg-slate-950/50 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30 transition-all font-medium"
+                    value={record.buffer_min}
+                    onChange={(e) => handleChange("buffer_min", Number(e.target.value) || 0)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={saving}
+              className="w-full bg-white hover:bg-slate-100 text-slate-950 font-bold py-5 rounded-2xl shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-3 text-lg"
+            >
+              {saving ? (
+                <div className="w-5 h-5 border-2 border-slate-950/20 border-t-slate-950 rounded-full animate-spin"></div>
+              ) : (
+                "Save Preferences"
+              )}
+            </button>
+          </form>
+        )}
+      </section>
     </main>
   );
 }

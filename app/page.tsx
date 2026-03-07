@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, type CSSProperties } from "react";
-import { supabase } from "./supabaseClient"; 
+import { supabase } from "@/app/lib/supabaseClient";
 
 type BookingRow = {
   id: string;
@@ -82,10 +83,35 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 style={{ fontSize: "24px", marginBottom: "8px" }}>Dashboard</h1>
-      <p style={{ color: "#555", marginBottom: "24px" }}>
-        High-level overview of your Crewlink usage.
-      </p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "24px",
+        }}
+      >
+        <div>
+          <h1 style={{ fontSize: "24px", marginBottom: "8px" }}>Dashboard</h1>
+          <p style={{ color: "#555", margin: 0 }}>
+            High-level overview of your Crewlink usage.
+          </p>
+        </div>
+        <Link
+          href="/admin"
+          style={{
+            padding: "8px 16px",
+            background: "#111827",
+            color: "#fff",
+            borderRadius: "6px",
+            textDecoration: "none",
+            fontSize: "14px",
+            fontWeight: 500,
+          }}
+        >
+          Go to Admin Panel
+        </Link>
+      </div>
 
       {error && (
         <div

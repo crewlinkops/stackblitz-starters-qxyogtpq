@@ -1,17 +1,17 @@
-import { statCardStyle } from "../lib/styles";
-
 interface StatCardProps {
   label: string;
   value: number | string;
 }
 
-export function StatCard({ label, value }: StatCardProps) {
+export default function StatCard({ label, value }: StatCardProps) {
   return (
-    <div style={statCardStyle}>
-      <div style={{ fontSize: "13px", color: "#666", marginBottom: "4px" }}>
+    <div className="p-6 rounded-xl border border-slate-400/20 bg-slate-800/50 backdrop-blur-md shadow-lg transition-all hover:scale-[1.02] hover:bg-slate-800/60">
+      <div className="text-sm font-medium text-slate-400 mb-2 uppercase tracking-wider">
         {label}
       </div>
-      <div style={{ fontSize: "22px", fontWeight: 600 }}>{value}</div>
+      <div className="text-3xl font-bold text-white tracking-tight">
+        {value}
+      </div>
     </div>
   );
 }

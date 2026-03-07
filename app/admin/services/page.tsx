@@ -199,267 +199,177 @@ export default function ServicesAdminPage() {
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <main style={{ display: "flex", gap: 32 }}>
-      {/* Left: form */}
-      <section style={{ flex: "0 0 360px" }}>
-        <h1 style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>
-          Services
-        </h1>
-        <p style={{ fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>
-          {currentBusiness
-            ? `Services offered by: ${currentBusiness.name}`
-            : "Select a business in the sidebar to manage services."}
-        </p>
+    <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <header className="mb-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Service Catalog</h1>
+          <p className="text-slate-400">
+            {currentBusiness
+              ? `Offerings for ${currentBusiness.name}`
+              : "Select a business to manage its service offerings."}
+          </p>
+        </div>
+      </header>
 
-        {error && (
-          <div
-            style={{
-              marginBottom: 12,
-              padding: "8px 10px",
-              backgroundColor: "#fee2e2",
-              color: "#b91c1c",
-              fontSize: 13,
-              borderRadius: 6,
-            }}
-          >
-            {error}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left: Form Card */}
+        <section className="lg:col-span-4">
+          <div className="bg-slate-900/50 rounded-2xl border border-white/10 p-6 sm:p-8 backdrop-blur-xl shadow-2xl sticky top-8">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <span className="text-blue-500">{editingService ? "🛠️" : "✨"}</span>
+              {editingService ? "Edit Service" : "Define New Service"}
+            </h2>
+
+            {error && (
+              <div className="mb-6 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-in fade-in slide-in-from-top-2">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <label htmlFor="svc-name" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Service Name
+                </label>
+                <input
+                  id="svc-name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all font-medium"
+                  placeholder="e.g. Premium Consultation"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="svc-description" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Brief Description
+                </label>
+                <textarea
+                  id="svc-description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                  className="w-full bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all font-medium resize-none"
+                  placeholder="What does this service include?"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="svc-duration" className="block text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
+                  Duration (Minutes)
+                </label>
+                <div className="relative">
+                  <input
+                    id="svc-duration"
+                    type="number"
+                    min={1}
+                    value={durationMin}
+                    onChange={(e) => setDurationMin(e.target.value)}
+                    className="w-full bg-slate-800/40 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all font-medium pl-12"
+                  />
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase">Min</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={saving || !currentBusiness}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {saving ? (
+                    <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    editingService ? "Update Service" : "Launch Service"
+                  )}
+                </button>
+                {editingService && (
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    disabled={saving}
+                    className="px-6 py-3.5 border border-slate-700 hover:bg-slate-800 text-slate-300 font-bold rounded-xl transition-all"
+                  >
+                    Cancel
+                  </button>
+                )}
+              </div>
+            </form>
           </div>
-        )}
+        </section>
 
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 10,
-            padding: 16,
-            borderRadius: 8,
-            border: "1px solid #374151",
-            backgroundColor: "#020617",
-          }}
-        >
-          <div>
-            <label
-              htmlFor="svc-name"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              Service name
-            </label>
-            <input
-              id="svc-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-              }}
-            />
-          </div>
+        {/* Right: Services List */}
+        <section className="lg:col-span-8">
+          <div className="bg-slate-900/30 rounded-2xl border border-white/5 p-6 backdrop-blur-sm overflow-hidden">
+            <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
+              <span className="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+              Current Offerings
+              <span className="ml-auto text-xs font-bold text-slate-600 bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5">
+                {services.length} Total
+              </span>
+            </h2>
 
-          <div>
-            <label
-              htmlFor="svc-description"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              Description
-            </label>
-            <textarea
-              id="svc-description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-                resize: "vertical",
-              }}
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="svc-duration"
-              style={{ display: "block", fontSize: 13, marginBottom: 4 }}
-            >
-              Duration (minutes)
-            </label>
-            <input
-              id="svc-duration"
-              type="number"
-              min={1}
-              value={durationMin}
-              onChange={(e) => setDurationMin(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "6px 8px",
-                borderRadius: 6,
-                border: "1px solid #4b5563",
-                backgroundColor: "#020617",
-                color: "#e5e7eb",
-                fontSize: 13,
-              }}
-            />
-          </div>
-
-          <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-            <button
-              type="submit"
-              disabled={saving || !currentBusiness}
-              style={{
-                padding: "6px 12px",
-                borderRadius: 6,
-                border: "none",
-                backgroundColor: "#22c55e",
-                color: "#020617",
-                fontSize: 13,
-                cursor: saving || !currentBusiness ? "default" : "pointer",
-                opacity: saving || !currentBusiness ? 0.7 : 1,
-              }}
-            >
-              {editingService ? "Save changes" : "Add service"}
-            </button>
-            {editingService && (
-              <button
-                type="button"
-                onClick={resetForm}
-                disabled={saving}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: 6,
-                  border: "1px solid #4b5563",
-                  backgroundColor: "transparent",
-                  color: "#e5e7eb",
-                  fontSize: 13,
-                  cursor: saving ? "default" : "pointer",
-                }}
-              >
-                Cancel
-              </button>
+            {loading ? (
+              <div className="flex items-center justify-center py-20 grayscale opacity-50 italic text-slate-500">
+                Synchronizing catalog...
+              </div>
+            ) : services.length === 0 ? (
+              <div className="text-center py-20 rounded-2xl border border-dashed border-slate-800 bg-slate-950/20">
+                <div className="text-5xl mb-4 grayscale opacity-20 text-emerald-500">🛠️</div>
+                <h3 className="text-lg font-bold text-slate-400 mb-1">Catalog is empty</h3>
+                <p className="text-slate-600 px-10">Define your first service to start accepting bookings.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto ring-1 ring-white/5 rounded-2xl shadow-sm">
+                <table className="min-w-full divide-y divide-white/5 bg-slate-900/40">
+                  <thead className="bg-slate-950/40">
+                    <tr>
+                      <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Service</th>
+                      <th scope="col" className="px-6 py-4 text-left text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] hidden sm:table-cell">Duration</th>
+                      <th scope="col" className="px-6 py-4 text-right text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">Manage</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {services.map((svc) => (
+                      <tr key={svc.id} className="group hover:bg-white/5 transition-colors">
+                        <td className="px-6 py-5">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">
+                              {svc.name || "Unnamed Service"}
+                            </span>
+                            <span className="text-xs text-slate-500 line-clamp-1 max-w-xs">{svc.description || "No description provided."}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 hidden sm:table-cell">
+                          <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-800 border border-white/5 text-[10px] font-bold text-slate-400">
+                            🕔 {svc.duration_min} MIN
+                          </div>
+                        </td>
+                        <td className="px-6 py-5 text-right space-x-2 whitespace-nowrap">
+                          <button
+                            onClick={() => startEdit(svc)}
+                            className="inline-flex items-center px-3 py-1.5 rounded-lg border border-white/10 text-xs font-bold text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(svc)}
+                            className="inline-flex items-center px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-xs font-bold text-rose-500 hover:bg-rose-500 hover:text-white transition-all"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
-        </form>
-      </section>
-
-      {/* Right: list */}
-      <section style={{ flex: 1 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12 }}>
-          Existing services
-        </h2>
-
-        {loading ? (
-          <p style={{ fontSize: 13, color: "#9ca3af" }}>Loading services…</p>
-        ) : services.length === 0 ? (
-          <p style={{ fontSize: 13, color: "#9ca3af" }}>
-            No services found for this business.
-          </p>
-        ) : (
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: 13,
-            }}
-          >
-            <thead>
-              <tr>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Name
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Description
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Duration
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "6px 8px",
-                    borderBottom: "1px solid #374151",
-                  }}
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {services.map((svc) => (
-                <tr key={svc.id}>
-                  <td style={{ padding: "6px 8px" }}>{svc.name || "—"}</td>
-                  <td style={{ padding: "6px 8px", maxWidth: 400 }}>
-                    {svc.description || "—"}
-                  </td>
-                  <td style={{ padding: "6px 8px" }}>
-                    {svc.duration_min != null ? `${svc.duration_min} min` : "—"}
-                  </td>
-                  <td style={{ padding: "6px 8px" }}>
-                    <button
-                      type="button"
-                      onClick={() => startEdit(svc)}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        border: "1px solid #4b5563",
-                        backgroundColor: "transparent",
-                        color: "#e5e7eb",
-                        fontSize: 12,
-                        cursor: "pointer",
-                        marginRight: 8,
-                      }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(svc)}
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: 6,
-                        border: "none",
-                        backgroundColor: "#ef4444",
-                        color: "#f9fafb",
-                        fontSize: 12,
-                        cursor: "pointer",
-                      }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
