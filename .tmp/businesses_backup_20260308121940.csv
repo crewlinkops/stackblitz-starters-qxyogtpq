@@ -1,0 +1,3 @@
+id,slug,name,calendly_url,created_at,industry,onboarded
+3,test-business,Test Business,,2026-03-02T03:04:44.63701+00:00,,False
+2,my-local-business,My Local Business,,2026-03-02T02:55:35.864147+00:00,cleaning,True

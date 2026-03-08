@@ -1,0 +1,8 @@
+id,business_slug,name,description,duration_min,price_cents,active,created_at
+1,my-local-business,Residential Deep Clean,Extensive whole-home cleaning including baseboards and windows.,240,,True,2026-03-07T16:37:52.732803+00:00
+2,my-local-business,Standard Weekly Maintenance,"Routine cleaning, vacuuming, and dusting.",120,,True,2026-03-07T16:37:52.732803+00:00
+3,my-local-business,Move-In / Move-Out Scour,Detailed empty-home cleaning for transitions.,300,,True,2026-03-07T16:37:52.732803+00:00
+4,my-local-business,Residential Deep Clean,Extensive whole-home cleaning including baseboards and windows.,240,,True,2026-03-07T16:39:13.714589+00:00
+5,my-local-business,Standard Weekly Maintenance,"Routine cleaning, vacuuming, and dusting.",120,,True,2026-03-07T16:39:13.714589+00:00
+6,my-local-business,Move-In / Move-Out Scour,Detailed empty-home cleaning for transitions.,300,,True,2026-03-07T16:39:13.714589+00:00
+7,my-local-business,test service 1,testing,60,,True,2026-03-08T16:16:24.62562+00:00
