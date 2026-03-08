@@ -33,6 +33,7 @@ export default function WizardBookingPage({ params }: PageProps) {
 
     // Form State
     const [issueDescription, setIssueDescription] = useState("");
+    const [urgency, setUrgency] = useState("normal");
     const [services, setServices] = useState<Service[]>([]);
     const [slots, setSlots] = useState<Slot[]>([]);
     const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
@@ -40,6 +41,7 @@ export default function WizardBookingPage({ params }: PageProps) {
     const [customerName, setCustomerName] = useState("");
     const [customerEmail, setCustomerEmail] = useState("");
     const [customerPhone, setCustomerPhone] = useState("");
+    const [customerAddress, setCustomerAddress] = useState("");
 
     // Load services + open slots
     useEffect(() => {
@@ -126,8 +128,8 @@ export default function WizardBookingPage({ params }: PageProps) {
         e.preventDefault();
         setError(null);
 
-        if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim()) {
-            setError("Please fill in all contact details.");
+        if (!customerName.trim() || !customerEmail.trim() || !customerPhone.trim() || !customerAddress.trim()) {
+            setError("Please fill in all contact details, including the service address.");
             return;
         }
 
@@ -148,6 +150,8 @@ export default function WizardBookingPage({ params }: PageProps) {
                 customer_name: customerName.trim(),
                 customer_email: customerEmail.trim(),
                 customer_phone: customerPhone.trim(),
+                customer_address: customerAddress.trim(),
+                urgency: urgency,
                 service_id: selectedServiceId,
                 preferred_time: slot.start_time,
                 assigned_technician_id: slot.technician_id,
@@ -239,14 +243,34 @@ export default function WizardBookingPage({ params }: PageProps) {
                             <div className="space-y-6 flex-1 animate-in fade-in slide-in-from-right-8 duration-500">
                                 <div>
                                     <h2 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">What can we help with?</h2>
-                                    <p className="text-zinc-600 dark:text-zinc-400">Describe the issue you&apos;re facing. Our technicians will review this before your appointment.</p>
+                                    <p className="text-zinc-600 dark:text-zinc-400">Describe the issue and indicate the urgency. Our technicians will review this before arrival.</p>
                                 </div>
-                                <textarea
-                                    className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all min-h-[180px] text-lg resize-none"
-                                    placeholder="e.g. My laptop won't turn on after a spill..."
-                                    value={issueDescription}
-                                    onChange={(e) => setIssueDescription(e.target.value)}
-                                />
+                                <div className="space-y-3">
+                                    <label className="text-sm font-medium text-zinc-500 dark:text-zinc-500 ml-1 uppercase tracking-wider">Urgency Level</label>
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                        {['emergency', 'high', 'normal', 'flexible'].map((level) => (
+                                            <button
+                                                key={level}
+                                                onClick={() => setUrgency(level)}
+                                                className={`py-3 px-2 rounded-xl text-sm font-bold capitalize transition-all border ${urgency === level
+                                                        ? level === 'emergency' ? 'bg-rose-500/20 border-rose-500/50 text-rose-500 shadow-md ring-1 ring-rose-500/50' : 'bg-red-700/20 border-red-600/50 text-red-600 dark:text-red-400 shadow-md ring-1 ring-red-600/50'
+                                                        : 'bg-zinc-200/30 dark:bg-zinc-800/30 border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500'
+                                                    }`}
+                                            >
+                                                {level}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-zinc-500 dark:text-zinc-500 ml-1 uppercase tracking-wider">Issue Description</label>
+                                    <textarea
+                                        className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-white placeholder:text-zinc-500 dark:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all min-h-[140px] text-lg resize-none"
+                                        placeholder="e.g. My AC unit is blowing warm air..."
+                                        value={issueDescription}
+                                        onChange={(e) => setIssueDescription(e.target.value)}
+                                    />
+                                </div>
                                 <button
                                     onClick={handleNextStep}
                                     className="w-full py-4 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
@@ -263,16 +287,26 @@ export default function WizardBookingPage({ params }: PageProps) {
                                     <p className="text-zinc-600 dark:text-zinc-400">Select the service type and your preferred time slot.</p>
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                     <label className="text-sm font-medium text-zinc-500 dark:text-zinc-500 ml-1 uppercase tracking-wider">Service Type</label>
-                                    <select
-                                        className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all appearance-none cursor-pointer"
-                                        value={selectedServiceId ?? ""}
-                                        onChange={(e) => setSelectedServiceId(Number(e.target.value))}
-                                    >
-                                        <option value="" className="bg-zinc-100 dark:bg-zinc-900">Select a service...</option>
-                                        {services.map(s => <option key={s.id} value={s.id} className="bg-zinc-100 dark:bg-zinc-900">{s.name} ({s.duration_min} min)</option>)}
-                                    </select>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {services.map(s => (
+                                            <button
+                                                key={s.id}
+                                                onClick={() => setSelectedServiceId(s.id)}
+                                                className={`flex flex-col items-start p-4 rounded-xl border text-left transition-all ${selectedServiceId === s.id
+                                                        ? "bg-red-700/20 border-red-600/50 ring-1 ring-red-600/50 shadow-md"
+                                                        : "bg-zinc-200/30 dark:bg-zinc-800/30 border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-600"
+                                                    }`}
+                                            >
+                                                <span className="font-bold text-zinc-900 dark:text-white">{s.name}</span>
+                                                <span className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">{s.duration_min} min</span>
+                                                {s.description && (
+                                                    <span className="text-xs text-zinc-500 dark:text-zinc-500 mt-2 line-clamp-2">{s.description}</span>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2">
@@ -314,8 +348,12 @@ export default function WizardBookingPage({ params }: PageProps) {
                                         <input type="email" className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all placeholder:text-zinc-600" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="jane@example.com" />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-500 ml-1 uppercase tracking-wider">Phone Number</label>
+                                        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-500 ml-1 uppercase tracking-wider">Phone Number *</label>
                                         <input type="tel" className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all placeholder:text-zinc-600" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+1 (555) 000-0000" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-500 dark:text-zinc-500 ml-1 uppercase tracking-wider">Service Address *</label>
+                                        <input type="text" className="w-full bg-zinc-200/50 dark:bg-zinc-800/50 border border-zinc-300 dark:border-zinc-700 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/50 transition-all placeholder:text-zinc-600" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} placeholder="123 Main St, Appletree, CA 90210" />
                                     </div>
                                 </div>
                                 <div className="flex gap-4 pt-4">
@@ -342,8 +380,16 @@ export default function WizardBookingPage({ params }: PageProps) {
                                         <span className="text-zinc-900 dark:text-white font-bold">{slots.find(s => s.id === selectedSlotId) ? formatTimeRange(slots.find(s => s.id === selectedSlotId)!.start_time, slots.find(s => s.id === selectedSlotId)!.end_time) : ""}</span>
                                     </div>
                                     <div className="flex flex-col sm:flex-row sm:justify-between border-b border-zinc-200 dark:border-white/5 pb-3">
-                                        <span className="text-zinc-500 dark:text-zinc-500 text-sm font-medium uppercase tracking-widest">Contact</span>
+                                        <span className="text-zinc-500 dark:text-zinc-500 text-sm font-medium uppercase tracking-widest">Urgency</span>
+                                        <span className={`font-bold capitalize ${urgency === 'emergency' ? 'text-rose-500' : 'text-zinc-900 dark:text-white'}`}>{urgency}</span>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:justify-between border-b border-zinc-200 dark:border-white/5 pb-3">
+                                        <span className="text-zinc-500 dark:text-zinc-500 text-sm font-medium uppercase tracking-widest">Contact Name</span>
                                         <span className="text-zinc-900 dark:text-white font-bold">{customerName}</span>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row sm:justify-between border-b border-zinc-200 dark:border-white/5 pb-3 block">
+                                        <span className="text-zinc-500 dark:text-zinc-500 text-sm font-medium uppercase tracking-widest mb-1 sm:mb-0">Service Location</span>
+                                        <span className="text-zinc-900 dark:text-white font-medium text-right sm:max-w-[250px]">{customerAddress}</span>
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="text-zinc-500 dark:text-zinc-500 text-sm font-medium uppercase tracking-widest mb-1">Issue Description</span>

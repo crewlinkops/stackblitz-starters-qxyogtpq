@@ -30,6 +30,12 @@ interface Booking {
     status: string;
 }
 
+interface Service {
+    id: number;
+    name: string;
+    duration_min: number | null;
+}
+
 interface ExternalEvent {
     id: string;
     summary: string;
@@ -58,9 +64,39 @@ export default function CalendarAdminPage() {
 
     // Data State
     const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
     const [googleConnected, setGoogleConnected] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Modal State
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [slotStart, setSlotStart] = useState<Date | null>(null);
+
+    // Form State
+    const [customerName, setCustomerName] = useState("");
+    const [customerEmail, setCustomerEmail] = useState("");
+    const [customerPhone, setCustomerPhone] = useState("");
+    const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+    const [notes, setNotes] = useState("");
+    const [savingOption, setSavingOption] = useState(false);
+
+    // Load services
+    useEffect(() => {
+        if (!currentBusiness) return;
+        const fetchServices = async () => {
+            const { data } = await supabase
+                .from("services")
+                .select("id, name, duration_min")
+                .eq("business_slug", currentBusiness.slug)
+                .order("name");
+            if (data) {
+                setServices(data);
+                if (data.length > 0) setSelectedServiceId(data[0].id);
+            }
+        };
+        fetchServices();
+    }, [currentBusiness]);
 
     // Load preferred view from local storage on mount
     useEffect(() => {
@@ -196,6 +232,78 @@ export default function CalendarAdminPage() {
         localStorage.setItem("crewlink_calendar_view", newView);
     };
 
+    const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+        if (slotInfo.start < new Date()) {
+            setError("Cannot create a booking in the past.");
+            return;
+        }
+        setSlotStart(slotInfo.start);
+
+        // Reset form
+        setCustomerName("");
+        setCustomerEmail("");
+        setCustomerPhone("");
+        setNotes("");
+        setError(null);
+
+        setShowAddModal(true);
+    };
+
+    const handleAddBooking = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!currentBusiness || !slotStart || !selectedServiceId || !customerName || !customerEmail) {
+            setError("Please fill in all required fields.");
+            return;
+        }
+
+        setSavingOption(true);
+        setError(null);
+
+        try {
+            // 1. Insert Booking
+            const { data: bookingRows, error: bookingError } = await supabase
+                .from("bookings")
+                .insert({
+                    business_slug: currentBusiness.slug,
+                    customer_name: customerName,
+                    customer_email: customerEmail,
+                    customer_phone: customerPhone,
+                    service_id: selectedServiceId,
+                    preferred_time: slotStart.toISOString(),
+                    status: "new",
+                    notes: notes,
+                })
+                .select()
+                .limit(1);
+
+            if (bookingError || !bookingRows || bookingRows.length === 0) {
+                throw new Error(bookingError?.message || "Failed to create booking.");
+            }
+
+            const booking = bookingRows[0];
+
+            // 2. Sync to Google Calendar
+            if (googleConnected) {
+                fetch("/api/google-calendar/events", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        bookingId: booking.id,
+                        businessSlug: currentBusiness.slug,
+                    }),
+                }).catch((err) => console.error("Calendar sync error:", err));
+            }
+
+            // 3. Refresh calendar and close
+            setShowAddModal(false);
+            loadData(); // Re-fetch all events so the new one appears immediately
+        } catch (err: any) {
+            setError(err.message);
+        } finally {
+            setSavingOption(false);
+        }
+    };
+
     // Custom Event Styling
     const eventPropGetter = (event: CalendarEvent) => {
         const isInternal = event.type === 'internal';
@@ -261,11 +369,79 @@ export default function CalendarAdminPage() {
                         eventPropGetter={eventPropGetter}
                         tooltipAccessor={(event) => `${event.title}\n${event.details}`}
                         popup={true}
-                        selectable={false}
+                        selectable={true}
+                        onSelectSlot={handleSelectSlot}
                     // We style the calendar wrapper via CSS to match the app theme
                     />
                 </div>
             </div>
+
+            {/* Click-to-add Modal */}
+            {showAddModal && slotStart && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                        <div className="px-6 py-4 border-b border-zinc-200 dark:border-white/5 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">New Booking</h3>
+                                <p className="text-sm text-zinc-500">{slotStart.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+                            </div>
+                            <button onClick={() => setShowAddModal(false)} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleAddBooking} className="p-6 space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2 col-span-2">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Service</label>
+                                    <select
+                                        className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50"
+                                        value={selectedServiceId || ""}
+                                        onChange={(e) => setSelectedServiceId(Number(e.target.value))}
+                                        required
+                                    >
+                                        <option value="" disabled>Select a service...</option>
+                                        {services.map(s => (
+                                            <option key={s.id} value={s.id}>{s.name} ({s.duration_min}m)</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="space-y-2 col-span-2 sm:col-span-1">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Customer Name *</label>
+                                    <input required className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Jane Doe" />
+                                </div>
+
+                                <div className="space-y-2 col-span-2 sm:col-span-1">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Email Address *</label>
+                                    <input required type="email" className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="jane@example.com" />
+                                </div>
+
+                                <div className="space-y-2 col-span-2">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Phone Number</label>
+                                    <input type="tel" className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="(555) 123-4567" />
+                                </div>
+
+                                <div className="space-y-2 col-span-2">
+                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Internal Notes</label>
+                                    <textarea className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 resize-none h-20 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Job details..." />
+                                </div>
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 px-4 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold text-sm rounded-xl transition-colors">Cancel</button>
+                                <button type="submit" disabled={savingOption} className="flex-[2] py-3 px-4 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex justify-center items-center shadow-lg transition-transform active:scale-95">
+                                    {savingOption ? (
+                                        <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        "Save Booking & Sync"
+                                    )}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </main>
     );
 }

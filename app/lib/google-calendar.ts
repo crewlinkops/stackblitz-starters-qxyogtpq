@@ -1,6 +1,5 @@
 import { google } from "googleapis";
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI } from "./env";
-import { supabase } from "@/app/lib/supabaseClient";
 
 // Helper to get a fresh client every time - safer for serverless env vars
 const getOAuthClient = (customRedirectUri?: string) => {
@@ -26,8 +25,12 @@ export const getAuthUrl = (businessSlug: string, customRedirectUri?: string) => 
   });
 };
 
+import { createClient } from "@supabase/supabase-js";
+import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from "./env";
+
 export const getTokens = async (businessSlug: string) => {
-  const { data, error } = await supabase
+  const adminSupabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+  const { data, error } = await adminSupabase
     .from("google_tokens")
     .select("*")
     .eq("business_slug", businessSlug)

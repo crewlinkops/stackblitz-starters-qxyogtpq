@@ -15,6 +15,8 @@ type Booking = {
   status: string | null;
   created_at: string;
   assigned_technician_id: number | null;
+  customer_address: string | null;
+  urgency: string | null;
 };
 
 type Technician = {
@@ -103,7 +105,7 @@ export default function BookingsAdminPage() {
       const { data: bookingData, error: bookingErr } = await supabase
         .from("bookings")
         .select(
-          "id, business_slug, customer_name, customer_email, service_id, preferred_time, status, created_at, assigned_technician_id"
+          "id, business_slug, customer_name, customer_email, service_id, preferred_time, status, created_at, assigned_technician_id, customer_address, urgency"
         )
         .eq("business_slug", currentBusiness.slug)
         .order("created_at", { ascending: false });
@@ -224,18 +226,38 @@ export default function BookingsAdminPage() {
                       </div>
                     </td>
                     <td className="px-6 py-6">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-zinc-900 dark:text-white mb-0.5 group-hover:text-red-500 transition-colors uppercase tracking-tight">{b.customer_name || "Guest User"}</span>
-                        <span className="text-xs text-zinc-500 dark:text-zinc-500 font-medium italic">{b.customer_email || "no-email-provided"}</span>
+                      <div className="flex flex-col gap-1.5 min-w-[200px]">
+                        <span className="text-sm font-bold text-zinc-900 dark:text-white group-hover:text-red-500 transition-colors uppercase tracking-tight">{b.customer_name || "Guest User"}</span>
+                        <div className="flex flex-col gap-1 mt-1">
+                          <div className="flex items-center gap-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                            <svg className="w-3.5 h-3.5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            <span className="truncate">{b.customer_email || "no-email-provided"}</span>
+                          </div>
+                          <div className="flex items-start gap-2 text-[11px] font-medium text-zinc-500 dark:text-zinc-400">
+                            <svg className="w-3.5 h-3.5 opacity-70 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <span className="truncate whitespace-normal max-w-[200px] leading-tight">{b.customer_address || "No address provided"}</span>
+                          </div>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-6">
-                      <div className="space-y-1.5 min-w-[140px]">
-                        <div className="text-xs font-bold text-zinc-700 dark:text-zinc-300 flex items-center gap-2">
-                          <span className="w-1 h-3 bg-red-600/60 rounded-full"></span>
+                      <div className="space-y-2 min-w-[150px]">
+                        <div className="flex items-center gap-2">
+                          {b.urgency === 'emergency' && (
+                            <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-rose-500 text-white rounded-md shadow-sm shadow-rose-500/40 animate-pulse">Emergency</span>
+                          )}
+                          {b.urgency !== 'emergency' && b.urgency && (
+                            <span className={`px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-md border ${b.urgency === 'high' ? 'bg-orange-500/10 text-orange-500 border-orange-500/20' :
+                                b.urgency === 'normal' ? 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20' :
+                                  'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                              }`}>{b.urgency}</span>
+                          )}
+                        </div>
+                        <div className="text-[13px] font-bold text-zinc-800 dark:text-zinc-200 flex items-center gap-2">
+                          <span className="w-1.5 h-3.5 bg-red-600/60 rounded-full"></span>
                           {serviceName(b.service_id)}
                         </div>
-                        <div className="text-[10px] font-bold text-zinc-600 uppercase flex items-center gap-1.5 pl-3">
+                        <div className="text-[10px] font-bold text-zinc-500 dark:text-zinc-500 uppercase flex items-center gap-1.5 pl-3.5">
                           {technicianName(b.assigned_technician_id)}
                         </div>
                       </div>
