@@ -4,11 +4,16 @@
 
 :root {
   /* Light mode */
-  --foreground-rgb: 24, 24, 27;        /* zinc-900 */
-  --background-rgb: 250, 250, 250;     /* zinc-50 */
-  --surface-rgb: 255, 255, 255;        /* white */
-  --muted-surface-rgb: 244, 244, 246;  /* zinc-100 */
-  --border-rgb: 228, 228, 231;         /* zinc-200 */
+  --foreground-rgb: 24, 24, 27;
+  /* zinc-900 */
+  --background-rgb: 250, 250, 250;
+  /* zinc-50 */
+  --surface-rgb: 255, 255, 255;
+  /* white */
+  --muted-surface-rgb: 244, 244, 246;
+  /* zinc-100 */
+  --border-rgb: 228, 228, 231;
+  /* zinc-200 */
 
   --danger-bg-rgb: 254, 226, 226;
   --danger-border-rgb: 252, 165, 165;
@@ -17,11 +22,15 @@
 
 .dark {
   /* Dark mode */
-  --foreground-rgb: 228, 228, 231;       /* zinc-200 */
-  --background-rgb: 9, 9, 11;            /* zinc-950 */
-  --surface-rgb: 9, 9, 11;               /* same as background, card style */
+  --foreground-rgb: 228, 228, 231;
+  /* zinc-200 */
+  --background-rgb: 9, 9, 11;
+  /* zinc-950 */
+  --surface-rgb: 9, 9, 11;
+  /* same as background, card style */
   --muted-surface-rgb: 9, 9, 11;
-  --border-rgb: 39, 39, 42;              /* zinc-800 */
+  --border-rgb: 39, 39, 42;
+  /* zinc-800 */
 
   --danger-bg-rgb: 69, 10, 10;
   --danger-border-rgb: 127, 29, 29;
@@ -36,4 +45,19 @@ body {
     sans-serif;
   color: rgb(var(--foreground-rgb));
   background-color: rgb(var(--background-rgb));
+}
+
+/* Fix react-big-calendar clickability overriding potential deadzones */
+.rbc-time-slot,
+.rbc-day-bg,
+.rbc-event {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
+
+.rbc-time-content,
+.rbc-month-view,
+.rbc-time-column,
+.rbc-day-slot {
+  pointer-events: auto !important;
 }

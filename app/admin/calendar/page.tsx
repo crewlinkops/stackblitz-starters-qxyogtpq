@@ -367,6 +367,7 @@ export default function CalendarAdminPage() {
                         popup={true}
                         selectable={true}
                         onSelectSlot={handleSelectSlot}
+                        onSelectEvent={(event) => alert(`Event: ${event.title}\nDetails: ${event.details}`)}
                     // We style the calendar wrapper via CSS to match the app theme
                     />
                 </div>
