@@ -9,7 +9,7 @@ export default function OutreachPage() {
     const [sending, setSending] = useState(false);
     const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
 
-    const handleSendLink = async (type: "direct" | "wizard") => {
+    const handleSendLink = async () => {
         if (!currentBusiness) return;
         if (!phone.trim()) {
             setResult({ success: false, message: "Please enter a phone number." });
@@ -26,14 +26,13 @@ export default function OutreachPage() {
                 body: JSON.stringify({
                     to: phone.trim(),
                     businessSlug: currentBusiness.slug,
-                    type: type,
                 }),
             });
 
             const data = await response.json();
 
             if (data.success) {
-                setResult({ success: true, message: `Successfully sent ${type} link to ${phone}` });
+                setResult({ success: true, message: `Successfully sent booking link to ${phone}` });
                 setPhone("");
             } else {
                 setResult({ success: false, message: data.error || "Failed to send link." });
@@ -74,30 +73,17 @@ export default function OutreachPage() {
                                 />
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <button
-                                    onClick={() => handleSendLink("direct")}
-                                    disabled={sending}
-                                    className="flex items-center justify-center gap-2 py-4 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {sending ? (
-                                        <div className="w-5 h-5 border-2 border-zinc-200 dark:border-white/20 border-t-white rounded-full animate-spin"></div>
-                                    ) : (
-                                        <span>Send Direct Link</span>
-                                    )}
-                                </button>
-                                <button
-                                    onClick={() => handleSendLink("wizard")}
-                                    disabled={sending}
-                                    className="flex items-center justify-center gap-2 py-4 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {sending ? (
-                                        <div className="w-5 h-5 border-2 border-zinc-200 dark:border-white/20 border-t-white rounded-full animate-spin"></div>
-                                    ) : (
-                                        <span>Send Wizard Link</span>
-                                    )}
-                                </button>
-                            </div>
+                            <button
+                                onClick={handleSendLink}
+                                disabled={sending}
+                                className="w-full flex items-center justify-center gap-2 py-4 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {sending ? (
+                                    <div className="w-5 h-5 border-2 border-zinc-200 dark:border-white/20 border-t-white rounded-full animate-spin"></div>
+                                ) : (
+                                    <span>Send Booking Link</span>
+                                )}
+                            </button>
 
                             {result && (
                                 <div className={`p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 duration-300 ${result.success
@@ -117,20 +103,12 @@ export default function OutreachPage() {
             <section className="space-y-6">
                 <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
                     <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                    Preview Messages
+                    Preview Message
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="bg-zinc-200/40 dark:bg-zinc-800/40 rounded-2xl p-6 border border-zinc-200 dark:border-white/5 shadow-sm hover:border-red-600/30 transition-colors">
-                        <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">Direct Link Flow</div>
-                        <div className="bg-zinc-100/50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 italic text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                            &quot;Hi! You can book your appointment with us directly here: https://gocrewlink.com/b/{currentBusiness.slug}&quot;
-                        </div>
-                    </div>
-                    <div className="bg-zinc-200/40 dark:bg-zinc-800/40 rounded-2xl p-6 border border-zinc-200 dark:border-white/5 shadow-sm hover:border-red-600/30 transition-colors">
-                        <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">Wizard Link Flow</div>
-                        <div className="bg-zinc-100/50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 italic text-zinc-700 dark:text-zinc-300 leading-relaxed">
-                            &quot;Hi! Please use our service wizard to book your appointment: https://gocrewlink.com/wizard/{currentBusiness.slug}&quot;
-                        </div>
+                <div className="bg-zinc-200/40 dark:bg-zinc-800/40 rounded-2xl p-6 border border-zinc-200 dark:border-white/5 shadow-sm hover:border-red-600/30 transition-colors">
+                    <div className="text-xs font-bold text-red-600 uppercase tracking-widest mb-3">Booking Link Flow</div>
+                    <div className="bg-zinc-100/50 dark:bg-zinc-900/50 p-4 rounded-xl border border-zinc-200 dark:border-white/5 italic text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                        &quot;Hi! Please use our service wizard to book your appointment: https://gocrewlink.com/wizard/{currentBusiness.slug}&quot;
                     </div>
                 </div>
             </section>
