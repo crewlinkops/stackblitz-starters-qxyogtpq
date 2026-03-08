@@ -6,12 +6,27 @@ import { sendSMS } from "@/app/lib/sms";
 export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const businessSlug = searchParams.get("slug");
+    const startStr = searchParams.get("start");
+    const endStr = searchParams.get("end");
 
     if (!businessSlug) {
         return NextResponse.json({ error: "Missing business slug" }, { status: 400 });
     }
 
-    const result = await listEvents(businessSlug);
+    // Default to a wide range if not provided (e.g., current month)
+    const timeMin = startStr ? new Date(startStr).toISOString() : new Date().toISOString();
+
+    let timeMax: string | undefined;
+    if (endStr) {
+        timeMax = new Date(endStr).toISOString();
+    } else {
+        // If no end provided, fetch ~30 days out by default to be safe
+        const d = new Date(timeMin);
+        d.setDate(d.getDate() + 30);
+        timeMax = d.toISOString();
+    }
+
+    const result = await listEvents(businessSlug, timeMin, timeMax);
 
     if (!result.success) {
         return NextResponse.json({ error: result.error }, { status: 500 });

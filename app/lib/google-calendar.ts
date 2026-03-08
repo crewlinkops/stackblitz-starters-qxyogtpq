@@ -81,7 +81,7 @@ export const createEvent = async (
   }
 };
 
-export const listEvents = async (businessSlug: string, timeMin?: string) => {
+export const listEvents = async (businessSlug: string, timeMin?: string, timeMax?: string) => {
   try {
     const tokens = await getTokens(businessSlug);
 
@@ -98,13 +98,19 @@ export const listEvents = async (businessSlug: string, timeMin?: string) => {
 
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
 
-    const response = await calendar.events.list({
+    const requestParams: any = {
       calendarId: "primary",
-      timeMin: timeMin || new Date().toISOString(),
-      maxResults: 10,
+      maxResults: 250, // Fetch more events for broader views
       singleEvents: true,
       orderBy: "startTime",
-    });
+    };
+
+    if (timeMin) requestParams.timeMin = timeMin;
+    else requestParams.timeMin = new Date().toISOString();
+
+    if (timeMax) requestParams.timeMax = timeMax;
+
+    const response = await calendar.events.list(requestParams);
 
     return { success: true, data: response.data.items };
   } catch (error: any) {
