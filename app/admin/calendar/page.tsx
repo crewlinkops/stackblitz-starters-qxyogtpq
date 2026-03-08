@@ -233,10 +233,6 @@ export default function CalendarAdminPage() {
     };
 
     const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-        if (slotInfo.start < new Date()) {
-            setError("Cannot create a booking in the past.");
-            return;
-        }
         setSlotStart(slotInfo.start);
 
         // Reset form
