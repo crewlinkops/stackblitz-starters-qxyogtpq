@@ -1,8 +1,12 @@
 import './globals.css';
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 
-const inter = Inter({ subsets: ['latin'] });
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-primary',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://gocrewlink.com'),
@@ -40,7 +44,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${jakarta.className} ${jakarta.variable} antialiased selection:bg-brand-base selection:text-white`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -40,21 +40,21 @@ export function AdminAuth() {
     };
 
     if (loading) {
-        return <div className="text-xs text-zinc-500 font-bold uppercase tracking-widest animate-pulse">Checking auth...</div>;
+        return <div className="text-xs text-slate-500 font-bold uppercase tracking-widest animate-pulse">Checking auth...</div>;
     }
 
     if (user) {
         return (
             <div className="flex flex-col gap-4">
-                <div className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-widest">
                     Account
-                    <div className="text-sm font-bold text-zinc-900 dark:text-white mt-1 truncate max-w-[180px]">
+                    <div className="text-sm font-bold text-slate-900 dark:text-white mt-1 truncate max-w-[180px]">
                         {user.email}
                     </div>
                 </div>
                 <button
                     onClick={handleSignOut}
-                    className="w-full py-2 bg-red-600/10 hover:bg-red-600/20 text-red-500 border border-red-600/20 rounded-xl text-xs font-bold transition-all"
+                    className="w-full py-2 bg-brand-base/10 hover:bg-brand-light/20 text-brand-base border border-brand-base/20 rounded-xl text-xs font-bold transition-all"
                 >
                     Sign Out
                 </button>
@@ -64,12 +64,12 @@ export function AdminAuth() {
 
     return (
         <div className="flex flex-col gap-4">
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">
                 Admin Portal
             </p>
             <button
                 onClick={handleSignIn}
-                className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white border border-zinc-200 dark:border-white/10 rounded-xl transition-all hover:bg-zinc-50 dark:hover:bg-zinc-800 shadow-sm"
+                className="w-full flex items-center justify-center gap-3 py-3 bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl transition-all hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm"
             >
                 <svg width="18" height="18" viewBox="0 0 18 18">
                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4" />

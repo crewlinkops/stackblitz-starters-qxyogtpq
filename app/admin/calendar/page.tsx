@@ -306,8 +306,8 @@ export default function CalendarAdminPage() {
 
         // Crewlink Red Theme vs Google Gray/Blue Theme
         const bgClass = isInternal
-            ? 'bg-red-600 border-red-700'
-            : 'bg-zinc-500 border-zinc-600 dark:bg-zinc-700 dark:border-zinc-800';
+            ? 'bg-brand-base border-brand-light'
+            : 'bg-slate-500 border-slate-600 dark:bg-slate-700 dark:border-slate-800';
 
         return {
             className: `${bgClass} text-white text-xs border rounded-md shadow-sm opacity-90 hover:opacity-100 transition-opacity`
@@ -318,35 +318,35 @@ export default function CalendarAdminPage() {
 
     return (
         <main className="max-w-7xl mx-auto py-8 lg:px-8">
-            <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-zinc-200 dark:border-white/5 pb-6 px-4 lg:px-0">
+            <header className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 dark:border-white/5 pb-6 px-4 lg:px-0">
                 <div>
-                    <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Calendar</h1>
-                    <p className="text-zinc-600 dark:text-zinc-400">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">Calendar</h1>
+                    <p className="text-slate-600 dark:text-slate-400">
                         Manage your schedule and prevent double-booking.
                     </p>
                 </div>
                 {/* Status Badges */}
                 <div className="flex gap-4">
                     {!googleConnected && !loading && (
-                        <a href="/admin/settings" className="flex items-center gap-2 px-3 py-1.5 bg-red-600/10 border border-red-600/20 text-red-500 text-xs font-bold rounded-xl hover:bg-red-600/20 transition-colors">
-                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                        <a href="/admin/settings" className="flex items-center gap-2 px-3 py-1.5 bg-brand-base/10 border border-brand-base/20 text-brand-base text-xs font-bold rounded-xl hover:bg-brand-light/20 transition-colors">
+                            <span className="w-2 h-2 rounded-full bg-brand-light animate-pulse"></span>
                             Connect Google
                         </a>
                     )}
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-white/5 rounded-xl">
-                        <span className="w-2 h-2 rounded-full bg-zinc-500"></span>
-                        <span className="text-xs font-bold text-zinc-600 dark:text-zinc-400">Synced</span>
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/5 rounded-xl">
+                        <span className="w-2 h-2 rounded-full bg-slate-500"></span>
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Synced</span>
                     </div>
                 </div>
             </header>
 
             {error && (
-                <div className="mx-4 lg:mx-0 mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium flex items-center gap-3">
+                <div className="mx-4 lg:mx-0 mb-6 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-sm font-medium flex items-center gap-3">
                     <span>⚠️</span> {error}
                 </div>
             )}
 
-            <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl mx-4 lg:mx-0">
+            <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-white/10 rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl mx-4 lg:mx-0">
                 {/* 
                    We use custom CSS overrides in globals.css (or inline) to make 
                    react-big-calendar match our dark theme. 
@@ -375,14 +375,14 @@ export default function CalendarAdminPage() {
 
             {/* Click-to-add Modal */}
             {showAddModal && slotStart && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-sm animate-in fade-in">
-                    <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
-                        <div className="px-6 py-4 border-b border-zinc-200 dark:border-white/5 flex items-center justify-between">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl md:rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95">
+                        <div className="px-6 py-4 border-b border-slate-200 dark:border-white/5 flex items-center justify-between">
                             <div>
-                                <h3 className="text-xl font-bold text-zinc-900 dark:text-white mb-1">New Booking</h3>
-                                <p className="text-sm text-zinc-500">{slotStart.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
+                                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-1">New Booking</h3>
+                                <p className="text-sm text-slate-500">{slotStart.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</p>
                             </div>
-                            <button onClick={() => setShowAddModal(false)} className="p-2 text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                            <button onClick={() => setShowAddModal(false)} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
                         </div>
@@ -390,9 +390,9 @@ export default function CalendarAdminPage() {
                         <form onSubmit={handleAddBooking} className="p-6 space-y-4">
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2 col-span-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Service</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Service</label>
                                     <select
-                                        className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50"
+                                        className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-base/50"
                                         value={selectedServiceId || ""}
                                         onChange={(e) => setSelectedServiceId(Number(e.target.value))}
                                         required
@@ -405,29 +405,29 @@ export default function CalendarAdminPage() {
                                 </div>
 
                                 <div className="space-y-2 col-span-2 sm:col-span-1">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Customer Name *</label>
-                                    <input required className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Jane Doe" />
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Customer Name *</label>
+                                    <input required className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-base/50 placeholder:text-slate-400 dark:placeholder:text-slate-600" value={customerName} onChange={(e) => setCustomerName(e.target.value)} placeholder="Jane Doe" />
                                 </div>
 
                                 <div className="space-y-2 col-span-2 sm:col-span-1">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Email Address *</label>
-                                    <input required type="email" className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="jane@example.com" />
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address *</label>
+                                    <input required type="email" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-base/50 placeholder:text-slate-400 dark:placeholder:text-slate-600" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)} placeholder="jane@example.com" />
                                 </div>
 
                                 <div className="space-y-2 col-span-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Phone Number</label>
-                                    <input type="tel" className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="(555) 123-4567" />
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Phone Number</label>
+                                    <input type="tel" className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-base/50 placeholder:text-slate-400 dark:placeholder:text-slate-600" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="(555) 123-4567" />
                                 </div>
 
                                 <div className="space-y-2 col-span-2">
-                                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Internal Notes</label>
-                                    <textarea className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-red-600/50 resize-none h-20 placeholder:text-zinc-400 dark:placeholder:text-zinc-600" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Job details..." />
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Internal Notes</label>
+                                    <textarea className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-base/50 resize-none h-20 placeholder:text-slate-400 dark:placeholder:text-slate-600" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Job details..." />
                                 </div>
                             </div>
 
                             <div className="pt-4 flex gap-3">
-                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 px-4 border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 font-bold text-sm rounded-xl transition-colors">Cancel</button>
-                                <button type="submit" disabled={savingOption} className="flex-[2] py-3 px-4 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex justify-center items-center shadow-lg transition-transform active:scale-95">
+                                <button type="button" onClick={() => setShowAddModal(false)} className="flex-1 py-3 px-4 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold text-sm rounded-xl transition-colors">Cancel</button>
+                                <button type="submit" disabled={savingOption} className="flex-[2] py-3 px-4 bg-brand-base hover:bg-rose-500 disabled:opacity-50 text-white font-bold text-sm rounded-xl flex justify-center items-center shadow-lg transition-transform active:scale-95">
                                     {savingOption ? (
                                         <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
                                     ) : (

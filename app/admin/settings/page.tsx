@@ -194,7 +194,7 @@ export default function SchedulingAdminPage() {
   if (bizLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-zinc-500 font-bold uppercase tracking-widest text-sm italic">
+        <div className="animate-pulse text-slate-500 font-bold uppercase tracking-widest text-sm italic">
           Loading business settings...
         </div>
       </div>
@@ -203,22 +203,22 @@ export default function SchedulingAdminPage() {
 
   return (
     <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6">
-      <header className="mb-10 text-center sm:text-left border-b border-zinc-200 dark:border-white/5 pb-8">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-white tracking-tight mb-2">Scheduling Settings</h1>
-        <p className="text-zinc-600 dark:text-zinc-400 text-lg">
-          Configure <span className="text-red-600 font-bold">{currentBusiness?.name}</span>&apos;s business hours and sync with external calendars.
+      <header className="mb-10 text-center sm:text-left border-b border-slate-200 dark:border-white/5 pb-8">
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">Scheduling Settings</h1>
+        <p className="text-slate-600 dark:text-slate-400 text-lg">
+          Configure <span className="text-brand-base font-bold">{currentBusiness?.name}</span>&apos;s business hours and sync with external calendars.
         </p>
       </header>
 
       {/* Google Calendar Integration Card */}
       <section className="mb-10">
         <div className="relative group">
-          <div className="relative bg-zinc-100/80 dark:bg-zinc-900/80 rounded-2xl p-6 sm:p-8 backdrop-blur-xl border border-zinc-200 dark:border-white/10 shadow-xl dark:shadow-2xl">
+          <div className="relative bg-slate-100/80 dark:bg-slate-900/80 rounded-2xl p-6 sm:p-8 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8">
               <div className="space-y-1">
-                <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-3">
-                  <div className="p-2 bg-red-600/10 rounded-lg">
-                    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                  <div className="p-2 bg-brand-base/10 rounded-lg">
+                    <svg className="w-5 h-5 text-brand-base" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                       <line x1="16" y1="2" x2="16" y2="6"></line>
                       <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -227,7 +227,7 @@ export default function SchedulingAdminPage() {
                   </div>
                   Google Calendar
                 </h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm">
+                <p className="text-slate-600 dark:text-slate-400 text-sm">
                   {googleConnected
                     ? "Your Crewlink bookings are automatically synced to Gmail."
                     : "Connect your Google Calendar to sync bookings as events."}
@@ -235,8 +235,8 @@ export default function SchedulingAdminPage() {
               </div>
 
               {googleConnected ? (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-red-600/10 border border-red-600/20 text-red-500 text-xs font-bold uppercase tracking-wider">
-                  <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-brand-base/10 border border-brand-base/20 text-brand-base text-xs font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 bg-brand-light rounded-full animate-pulse"></span>
                   Connected
                 </div>
               ) : (
@@ -246,7 +246,7 @@ export default function SchedulingAdminPage() {
                     window.location.href = `/api/google-calendar/auth?slug=${currentBusiness.slug}`;
                   }}
                   disabled={!currentBusiness}
-                  className="flex items-center gap-2 px-6 py-3 bg-red-700 hover:bg-red-600 text-zinc-900 dark:text-white font-bold rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  className="flex items-center gap-2 px-6 py-3 bg-brand-base hover:bg-brand-light text-slate-900 dark:text-white font-bold rounded-xl shadow-lg shadow-brand-base/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 18 18" fill="currentColor">
                     <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" />
@@ -260,21 +260,21 @@ export default function SchedulingAdminPage() {
             </div>
 
             {googleConnected && (
-              <div className="bg-zinc-100 dark:bg-zinc-950/50 rounded-xl border border-zinc-200 dark:border-white/5 p-4 sm:p-6 overflow-hidden">
-                <h3 className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest mb-4">Upcoming Schedule</h3>
+              <div className="bg-slate-100 dark:bg-slate-950/50 rounded-xl border border-slate-200 dark:border-white/5 p-4 sm:p-6 overflow-hidden">
+                <h3 className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest mb-4">Upcoming Schedule</h3>
                 {googleLoading ? (
-                  <div className="flex items-center gap-3 text-zinc-600 dark:text-zinc-400 text-sm animate-pulse">
-                    <div className="w-4 h-4 border-2 border-red-600/20 border-t-red-600 rounded-full animate-spin"></div>
+                  <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400 text-sm animate-pulse">
+                    <div className="w-4 h-4 border-2 border-brand-base/20 border-t-red-600 rounded-full animate-spin"></div>
                     Refreshing events...
                   </div>
                 ) : googleEvents.length === 0 ? (
-                  <p className="text-zinc-500 dark:text-zinc-500 text-sm italic py-4 text-center">No upcoming events found.</p>
+                  <p className="text-slate-500 dark:text-slate-500 text-sm italic py-4 text-center">No upcoming events found.</p>
                 ) : (
                   <div className="space-y-3">
                     {googleEvents.slice(0, 5).map((ev: any) => (
-                      <div key={ev.id} className="flex items-center justify-between p-3 bg-zinc-200/40 dark:bg-zinc-800/40 rounded-lg border border-zinc-200 dark:border-white/5">
-                        <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200 truncate pr-4">{ev.summary}</span>
-                        <span className="text-xs font-bold text-zinc-500 dark:text-zinc-500 whitespace-nowrap bg-zinc-100/80 dark:bg-zinc-900/80 px-2 py-1 rounded border border-zinc-200 dark:border-white/5">
+                      <div key={ev.id} className="flex items-center justify-between p-3 bg-slate-200/40 dark:bg-slate-800/40 rounded-lg border border-slate-200 dark:border-white/5">
+                        <span className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate pr-4">{ev.summary}</span>
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-500 whitespace-nowrap bg-slate-100/80 dark:bg-slate-900/80 px-2 py-1 rounded border border-slate-200 dark:border-white/5">
                           {new Date(ev.start.dateTime || ev.start.date).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         </span>
                       </div>
@@ -295,16 +295,16 @@ export default function SchedulingAdminPage() {
 
       {/* Appearance Settings Card */}
       <section className="mb-10">
-        <div className="bg-zinc-100/40 dark:bg-zinc-900/40 rounded-2xl border border-zinc-200 dark:border-white/5 p-6 sm:p-8 backdrop-blur-sm">
+        <div className="bg-slate-100/40 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-white/5 p-6 sm:p-8 backdrop-blur-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div className="space-y-1">
-              <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-3">
-                <div className="p-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg">
-                  <svg className="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+                <div className="p-2 bg-slate-200 dark:bg-slate-800 rounded-lg">
+                  <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
                 </div>
                 Appearance
               </h2>
-              <p className="text-zinc-600 dark:text-zinc-400 text-sm">
+              <p className="text-slate-600 dark:text-slate-400 text-sm">
                 Customize the visual theme of your dashboard.
               </p>
             </div>
@@ -319,7 +319,7 @@ export default function SchedulingAdminPage() {
       {/* Main Settings Form */}
       <section className="space-y-8">
         {(error || message) && (
-          <div className={`p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 ${error ? "bg-red-500/10 border-red-500/20 text-red-400" : "bg-red-600/10 border-red-600/20 text-red-500"
+          <div className={`p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 ${error ? "bg-rose-500/10 border-rose-500/20 text-rose-500" : "bg-brand-base/10 border-brand-base/20 text-brand-base"
             }`}>
             <div className="flex items-center gap-3 font-medium text-sm italic">
               <span>{error ? "⚠️" : "✅"}</span>
@@ -329,30 +329,30 @@ export default function SchedulingAdminPage() {
         )}
 
         {loading ? (
-          <div className="py-20 text-center text-zinc-500 dark:text-zinc-500 animate-pulse font-medium italic">
+          <div className="py-20 text-center text-slate-500 dark:text-slate-500 animate-pulse font-medium italic">
             Synchronizing profile settings...
           </div>
         ) : record && (
-          <form onSubmit={handleSave} className="bg-zinc-100/30 dark:bg-zinc-900/30 rounded-3xl border border-zinc-200 dark:border-white/5 p-6 sm:p-10 space-y-10 shadow-sm backdrop-blur-sm">
+          <form onSubmit={handleSave} className="bg-slate-100/30 dark:bg-slate-900/30 rounded-3xl border border-slate-200 dark:border-white/5 p-6 sm:p-10 space-y-10 shadow-sm backdrop-blur-sm">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Core Hours */}
               <div className="space-y-6">
-                <h3 className="text-sm font-bold text-red-600 uppercase tracking-widest pl-1">Operation Hours</h3>
+                <h3 className="text-sm font-bold text-brand-base uppercase tracking-widest pl-1">Operation Hours</h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest ml-1">Work Start</label>
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">Work Start</label>
                     <input
                       type="time"
-                      className="w-full bg-zinc-100 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/30 transition-all font-medium"
+                      className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/30 transition-all font-medium"
                       value={toTimeInput(record.work_start)}
                       onChange={(e) => handleChange("work_start", fromTimeInput(e.target.value))}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest ml-1">Work End</label>
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">Work End</label>
                     <input
                       type="time"
-                      className="w-full bg-zinc-100 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/30 transition-all font-medium"
+                      className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/30 transition-all font-medium"
                       value={toTimeInput(record.work_end)}
                       onChange={(e) => handleChange("work_end", fromTimeInput(e.target.value))}
                     />
@@ -362,22 +362,22 @@ export default function SchedulingAdminPage() {
 
               {/* Break Times */}
               <div className="space-y-6">
-                <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest pl-1">Break Times</h3>
+                <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest pl-1">Break Times</h3>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest ml-1">Lunch Start</label>
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">Lunch Start</label>
                     <input
                       type="time"
-                      className="w-full bg-zinc-100 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500/30 transition-all font-medium"
+                      className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-500/30 transition-all font-medium"
                       value={toTimeInput(record.lunch_start)}
                       onChange={(e) => handleChange("lunch_start", fromTimeInput(e.target.value))}
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest ml-1">Lunch End</label>
+                    <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">Lunch End</label>
                     <input
                       type="time"
-                      className="w-full bg-zinc-100 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-zinc-500/30 transition-all font-medium"
+                      className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-slate-500/30 transition-all font-medium"
                       value={toTimeInput(record.lunch_end)}
                       onChange={(e) => handleChange("lunch_end", fromTimeInput(e.target.value))}
                     />
@@ -387,23 +387,23 @@ export default function SchedulingAdminPage() {
             </div>
 
             {/* Durations */}
-            <div className="pt-8 border-t border-zinc-200 dark:border-white/5">
-              <h3 className="text-sm font-bold text-red-600 uppercase tracking-widest pl-1 mb-6">Booking Intervals</h3>
+            <div className="pt-8 border-t border-slate-200 dark:border-white/5">
+              <h3 className="text-sm font-bold text-brand-base uppercase tracking-widest pl-1 mb-6">Booking Intervals</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest ml-1">Slot Duration (Min)</label>
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">Slot Duration (Min)</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-100 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/30 transition-all font-medium"
+                    className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/30 transition-all font-medium"
                     value={record.slot_duration_min}
                     onChange={(e) => handleChange("slot_duration_min", Number(e.target.value) || 0)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-zinc-500 dark:text-zinc-500 uppercase tracking-widest ml-1">Buffer Time (Min)</label>
+                  <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">Buffer Time (Min)</label>
                   <input
                     type="number"
-                    className="w-full bg-zinc-100 dark:bg-zinc-950/50 border border-zinc-200 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-600/30 transition-all font-medium"
+                    className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/30 transition-all font-medium"
                     value={record.buffer_min}
                     onChange={(e) => handleChange("buffer_min", Number(e.target.value) || 0)}
                   />
@@ -414,10 +414,10 @@ export default function SchedulingAdminPage() {
             <button
               type="submit"
               disabled={saving}
-              className="w-full bg-white hover:bg-zinc-100 text-zinc-950 font-bold py-5 rounded-2xl shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-3 text-lg"
+              className="w-full bg-white hover:bg-slate-100 text-slate-950 font-bold py-5 rounded-2xl shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 flex items-center justify-center gap-3 text-lg"
             >
               {saving ? (
-                <div className="w-5 h-5 border-2 border-zinc-950/20 border-t-zinc-950 rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-slate-950/20 border-t-zinc-950 rounded-full animate-spin"></div>
               ) : (
                 "Save Preferences"
               )}

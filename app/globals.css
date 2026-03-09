@@ -3,48 +3,78 @@
 @tailwind utilities;
 
 :root {
-  /* Light mode */
-  --foreground-rgb: 24, 24, 27;
-  /* zinc-900 */
-  --background-rgb: 250, 250, 250;
-  /* zinc-50 */
+  /* Light mode: Bright, crisp, airy */
+  --foreground-rgb: 15, 23, 42;
+  /* slate-900 */
+  --background-rgb: 248, 250, 252;
+  /* slate-50 */
   --surface-rgb: 255, 255, 255;
   /* white */
-  --muted-surface-rgb: 244, 244, 246;
-  /* zinc-100 */
-  --border-rgb: 228, 228, 231;
-  /* zinc-200 */
+  --muted-surface-rgb: 241, 245, 249;
+  /* slate-100 */
+  --border-rgb: 226, 232, 240;
+  /* slate-200 */
+
+  /* Brand core: Indigo / Violet hues */
+  --brand-base-rgb: 79, 70, 229;
+  /* indigo-600 */
+  --brand-light-rgb: 99, 102, 241;
+  /* indigo-500 */
+  --brand-surface-rgb: 238, 242, 255;
+  /* indigo-50 */
 
   --danger-bg-rgb: 254, 226, 226;
+  /* red-100 */
   --danger-border-rgb: 252, 165, 165;
+  /* red-300 */
   --danger-text-rgb: 185, 28, 28;
+  /* red-700 */
 }
 
 .dark {
-  /* Dark mode */
-  --foreground-rgb: 228, 228, 231;
-  /* zinc-200 */
-  --background-rgb: 9, 9, 11;
-  /* zinc-950 */
-  --surface-rgb: 9, 9, 11;
-  /* same as background, card style */
-  --muted-surface-rgb: 9, 9, 11;
-  --border-rgb: 39, 39, 42;
-  /* zinc-800 */
+  /* Dark mode: Deep, immersive slate instead of flat zinc */
+  --foreground-rgb: 248, 250, 252;
+  /* slate-50 */
+  --background-rgb: 2, 6, 23;
+  /* slate-950 */
+  --surface-rgb: 15, 23, 42;
+  /* slate-900 */
+  --muted-surface-rgb: 30, 41, 59;
+  /* slate-800 */
+  --border-rgb: 51, 65, 85;
+  /* slate-700 */
+
+  /* Brand core (dark mode): Vibrant Indigo */
+  --brand-base-rgb: 99, 102, 241;
+  /* indigo-500 */
+  --brand-light-rgb: 129, 140, 248;
+  /* indigo-400 */
+  --brand-surface-rgb: 30, 27, 75;
+  /* indigo-950 */
 
   --danger-bg-rgb: 69, 10, 10;
+  /* red-950 */
   --danger-border-rgb: 127, 29, 29;
+  /* red-900 */
   --danger-text-rgb: 252, 165, 165;
+  /* red-300 */
 }
 
 html,
 body {
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: var(--font-primary), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   color: rgb(var(--foreground-rgb));
+  /* Added a subtle radial mesh gradient for premium depth */
+  background-image: radial-gradient(at 50% 0%, rgba(var(--brand-surface-rgb), 0.3) 0%, transparent 70%),
+    radial-gradient(at 100% 0%, rgba(var(--brand-surface-rgb), 0.4) 0%, transparent 50%),
+    linear-gradient(to bottom, rgb(var(--background-rgb)), rgb(var(--background-rgb)));
   background-color: rgb(var(--background-rgb));
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Fix react-big-calendar clickability overriding potential deadzones */

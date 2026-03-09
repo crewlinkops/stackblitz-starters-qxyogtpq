@@ -58,15 +58,15 @@ export function OnboardingWizard() {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-zinc-950/80 backdrop-blur-md" />
+            <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
 
             {/* Modal */}
-            <div className="relative w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="relative w-full max-w-2xl bg-slate-900 border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
 
                 {/* Progress Bar */}
-                <div className="absolute top-0 inset-x-0 h-1 bg-zinc-800">
+                <div className="absolute top-0 inset-x-0 h-1 bg-slate-800">
                     <div
-                        className="h-full bg-red-600 transition-all duration-500"
+                        className="h-full bg-brand-base transition-all duration-500"
                         style={{ width: `${(step / 2) * 100}%` }}
                     />
                 </div>
@@ -76,7 +76,7 @@ export function OnboardingWizard() {
                         <div className="space-y-8">
                             <div className="text-center">
                                 <h2 className="text-3xl font-bold text-white mb-2">Welcome to Crewlink</h2>
-                                <p className="text-zinc-400">Let&apos;s get your business set up. What industry are you in?</p>
+                                <p className="text-slate-400">Let&apos;s get your business set up. What industry are you in?</p>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -85,13 +85,13 @@ export function OnboardingWizard() {
                                         key={industry.id}
                                         onClick={() => setSelectedIndustry(industry)}
                                         className={`p-6 rounded-2xl border transition-all text-left flex items-center gap-4 ${selectedIndustry?.id === industry.id
-                                            ? "bg-red-600/10 border-red-600 ring-2 ring-red-600/20"
-                                            : "bg-zinc-800/40 border-white/5 hover:bg-zinc-800 hover:border-white/10"
+                                            ? "bg-brand-base/10 border-brand-base ring-2 ring-brand-base/20"
+                                            : "bg-slate-800/40 border-white/5 hover:bg-slate-800 hover:border-white/10"
                                             }`}
                                     >
                                         <div>
                                             <div className="font-bold text-white">{industry.name}</div>
-                                            <div className="text-xs text-zinc-500">{industry.templates.length} Ready-to-use services</div>
+                                            <div className="text-xs text-slate-500">{industry.templates.length} Ready-to-use services</div>
                                         </div>
                                     </button>
                                 ))}
@@ -100,7 +100,7 @@ export function OnboardingWizard() {
                             <button
                                 onClick={() => setStep(2)}
                                 disabled={!selectedIndustry}
-                                className="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full bg-brand-base hover:bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-base/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 Continue
                             </button>
@@ -109,18 +109,18 @@ export function OnboardingWizard() {
                         <div className="space-y-8">
                             <div className="text-center">
                                 <h2 className="text-3xl font-bold text-white mb-2">Ready to Launch!</h2>
-                                <p className="text-zinc-400">
+                                <p className="text-slate-400">
                                     We&apos;ve prepared {selectedIndustry?.templates.length} professional service blueprints for your {selectedIndustry?.name} business.
                                 </p>
                             </div>
 
-                            <div className="bg-zinc-800/50 rounded-2xl border border-white/5 p-6 overflow-hidden">
-                                <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-4">Inbound Catalog Preview</div>
+                            <div className="bg-slate-800/50 rounded-2xl border border-white/5 p-6 overflow-hidden">
+                                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Inbound Catalog Preview</div>
                                 <div className="space-y-3">
                                     {selectedIndustry?.templates.map((t, i) => (
                                         <div key={i} className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0">
                                             <div className="font-medium text-white text-sm">{t.name}</div>
-                                            <div className="text-zinc-500 text-xs">{t.duration_min}m</div>
+                                            <div className="text-slate-500 text-xs">{t.duration_min}m</div>
                                         </div>
                                     ))}
                                 </div>
@@ -129,14 +129,14 @@ export function OnboardingWizard() {
                             <div className="flex gap-4">
                                 <button
                                     onClick={() => setStep(1)}
-                                    className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-4 rounded-xl transition-all"
+                                    className="flex-1 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-xl transition-all"
                                 >
                                     Back
                                 </button>
                                 <button
                                     onClick={handleComplete}
                                     disabled={loading}
-                                    className="flex-[2] bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                                    className="flex-[2] bg-brand-base hover:bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-base/20 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                                 >
                                     {loading ? (
                                         <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
