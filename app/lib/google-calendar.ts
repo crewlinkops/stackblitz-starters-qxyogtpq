@@ -74,6 +74,7 @@ export const createEvent = async (
     const response = await calendar.events.insert({
       calendarId: "primary",
       requestBody: event,
+      sendUpdates: "all",
     });
 
     return { success: true, data: response.data };
