@@ -9,6 +9,7 @@ type Business = {
   name: string;
   industry: string | null;
   onboarded: boolean;
+  hq_address: string | null;
 };
 
 type BusinessContextType = {
@@ -52,7 +53,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       // Attempt to fetch with new metadata fields
       let { data, error } = await supabase
         .from("businesses")
-        .select("id, slug, name, industry, onboarded")
+        .select("id, slug, name, industry, onboarded, hq_address")
         .order("name", { ascending: true });
 
       // Fallback: If the migration hasn't been run yet, fetch without the new fields

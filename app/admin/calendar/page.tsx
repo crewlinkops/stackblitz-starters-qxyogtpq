@@ -4,9 +4,13 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { useBusiness } from "../BusinessContext";
 import { Calendar, dateFnsLocalizer, View, Views } from "react-big-calendar";
+import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+
+const DnDCalendar = withDragAndDrop<CalendarEvent>(Calendar as any);
 
 // Setup date-fns localizer for react-big-calendar
 const locales = {
@@ -105,6 +109,66 @@ export default function CalendarAdminPage() {
             setCurrentView(savedView);
         }
     }, []);
+
+    // Handle Drag and Drop
+    const onEventDrop = async ({ event, start, end }: any) => {
+        if (!currentBusiness?.slug) return;
+
+        // Optimistically update local state
+        const updatedEvents = events.map(e =>
+            e.id === event.id ? { ...e, start, end } : e
+        );
+        setEvents(updatedEvents);
+
+        if (event.type === "internal") {
+            // Internal booking: update Supabase directly
+            // Event ID for internal is typically a stringified number
+            const bookingId = parseInt(event.id, 10);
+            if (isNaN(bookingId)) {
+                console.error("Invalid internal booking ID");
+                return;
+            }
+
+            const { error: dbError } = await supabase
+                .from("bookings")
+                .update({ preferred_time: start.toISOString() })
+                .eq("id", bookingId);
+
+            if (dbError) {
+                console.error("Failed to move internal booking", dbError);
+                return;
+            }
+
+            // Sync to Google Calendar using our new PUT endpoint
+            fetch("/api/google-calendar/events", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    bookingId,
+                    type: "internal",
+                    businessSlug: currentBusiness.slug,
+                    start: start.toISOString(),
+                    end: end.toISOString()
+                })
+            }).catch(e => console.error("Sync error:", e));
+
+        } else if (event.type === "external") {
+            // External event: update Google Calendar API
+            fetch("/api/google-calendar/events", {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    eventId: event.id,
+                    type: "external",
+                    businessSlug: currentBusiness.slug,
+                    start: start.toISOString(),
+                    end: end.toISOString()
+                })
+            }).catch(e => {
+                console.error("Failed to move external event", e);
+            });
+        }
+    };
 
     const fetchEventsForRange = async (start: Date, end: Date) => {
         if (!currentBusiness) return;
@@ -352,7 +416,9 @@ export default function CalendarAdminPage() {
                    react-big-calendar match our dark theme. 
                  */}
                 <div className="h-[700px] md:h-[800px] p-4 rbc-theme-wrapper">
-                    <Calendar
+                    <DnDCalendar
+                        draggableAccessor={() => true}
+                        onEventDrop={onEventDrop}
                         localizer={localizer}
                         events={events}
                         startAccessor="start"
@@ -363,11 +429,11 @@ export default function CalendarAdminPage() {
                         onNavigate={handleNavigate}
                         onView={handleViewChange}
                         eventPropGetter={eventPropGetter}
-                        tooltipAccessor={(event) => `${event.title}\n${event.details}`}
+                        tooltipAccessor={(event: CalendarEvent) => `${event.title}\n${event.details}`}
                         popup={true}
                         selectable={true}
                         onSelectSlot={handleSelectSlot}
-                        onSelectEvent={(event) => alert(`Event: ${event.title}\nDetails: ${event.details}`)}
+                        onSelectEvent={(event: CalendarEvent) => alert(`Event: ${event.title}\nDetails: ${event.details}`)}
                     // We style the calendar wrapper via CSS to match the app theme
                     />
                 </div>

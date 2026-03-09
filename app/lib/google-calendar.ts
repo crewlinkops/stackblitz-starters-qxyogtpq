@@ -85,6 +85,45 @@ export const createEvent = async (
   }
 };
 
+export const updateEvent = async (
+  businessSlug: string,
+  eventId: string,
+  event: {
+    start?: { dateTime: string };
+    end?: { dateTime: string };
+  }
+) => {
+  try {
+    const tokens = await getTokens(businessSlug);
+
+    if (!tokens) {
+      return { success: false, error: "No tokens found" };
+    }
+
+    const oauth2Client = getOAuthClient();
+    oauth2Client.setCredentials({
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expiry_date: tokens.expiry_date,
+    });
+
+    const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+
+    // Patch instead of update to only overwrite provided fields
+    const response = await calendar.events.patch({
+      calendarId: "primary",
+      eventId: eventId,
+      requestBody: event,
+      sendUpdates: "all",
+    });
+
+    return { success: true, data: response.data };
+  } catch (error: any) {
+    console.error("Failed to update Google Calendar event:", error);
+    return { success: false, error: error.message };
+  }
+};
+
 export const listEvents = async (businessSlug: string, timeMin?: string, timeMax?: string) => {
   try {
     const tokens = await getTokens(businessSlug);

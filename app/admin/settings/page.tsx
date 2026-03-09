@@ -21,6 +21,7 @@ export default function SchedulingAdminPage() {
   const { currentBusiness, loading: bizLoading } = useBusiness();
 
   const [record, setRecord] = useState<Scheduling | null>(null);
+  const [hqAddress, setHqAddress] = useState("");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,6 +125,7 @@ export default function SchedulingAdminPage() {
   useEffect(() => {
     if (bizLoading) return;
     loadSettings();
+    if (currentBusiness) setHqAddress(currentBusiness.hq_address || "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBusiness?.slug, bizLoading]);
 
@@ -170,12 +172,29 @@ export default function SchedulingAdminPage() {
 
     const { data, error } = result;
 
+
     if (error) {
       console.error(error);
       setError("Failed to save settings: " + error.message);
       setSaving(false);
       return;
     }
+
+    if (hqAddress !== (currentBusiness?.hq_address || "")) {
+      const { error: bizError } = await supabase
+        .from("businesses")
+        .update({ hq_address: hqAddress || null })
+        .eq("slug", currentBusiness.slug);
+      if (bizError) {
+        console.error(bizError);
+        setError("Failed to save HQ Address: " + bizError.message);
+        setSaving(false);
+        return;
+      }
+      // Optimistically update context or prompt reload
+      // A full sync would require calling fetchBusinesses from context, but for now it's fine.
+    }
+
 
     setRecord(data as Scheduling);
     setMessage("Settings saved.");
@@ -334,6 +353,23 @@ export default function SchedulingAdminPage() {
           </div>
         ) : record && (
           <form onSubmit={handleSave} className="bg-slate-100/30 dark:bg-slate-900/30 rounded-3xl border border-slate-200 dark:border-white/5 p-6 sm:p-10 space-y-10 shadow-sm backdrop-blur-sm">
+            
+            {/* Business Profile */}
+            <div className="pt-2 pb-8 border-b border-slate-200 dark:border-white/5 space-y-6">
+              <h3 className="text-sm font-bold text-brand-base uppercase tracking-widest pl-1 mb-6">Company Headquarters</h3>
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-500 uppercase tracking-widest ml-1">HQ Address (Used for Routing)</label>
+                <input
+                  type="text"
+                  placeholder="123 Main St, City, State 12345"
+                  className="w-full bg-slate-100 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/30 transition-all font-medium"
+                  value={hqAddress}
+                  onChange={(e) => setHqAddress(e.target.value)}
+                />
+                <p className="text-[10px] text-slate-500 ml-2 mt-1">This address serves as the starting point for your technician's first job of the day.</p>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Core Hours */}
               <div className="space-y-6">

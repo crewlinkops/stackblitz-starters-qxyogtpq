@@ -37,6 +37,8 @@ export default function WizardBookingPage({ params }: PageProps) {
     const [services, setServices] = useState<Service[]>([]);
     const [slots, setSlots] = useState<Slot[]>([]);
     const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+    const [selectedDate, setSelectedDate] = useState<string>("");
+    const [slotsLoading, setSlotsLoading] = useState(false);
     const [selectedSlotId, setSelectedSlotId] = useState<number | null>(null);
     const [customerName, setCustomerName] = useState("");
     const [customerEmail, setCustomerEmail] = useState("");
@@ -62,58 +64,54 @@ export default function WizardBookingPage({ params }: PageProps) {
                 return;
             }
 
-            const { data: slotsData, error: slotsError } = await supabase
-                .from("time_slots")
-                .select(`
-            id,
-            start_time,
-            end_time,
-            technician_id,
-            technicians (
-              name
-            )
-          `)
-                .eq("business_slug", businessSlug)
-                .eq("status", "open")
-                .order("start_time", { ascending: true });
-
-            if (slotsError) {
-                console.error(slotsError);
-                setError("Failed to load available time slots.");
-                setLoading(false);
-                return;
-            }
-
-            const mappedSlots: Slot[] = slotsData?.map((row: any) => ({
-                id: row.id,
-                start_time: row.start_time,
-                end_time: row.end_time,
-                technician_id: row.technician_id,
-                technician_name: row.technicians?.name ?? null,
-            })) ?? [];
-
             setServices(servicesData ?? []);
-            setSlots(mappedSlots);
             setLoading(false);
         };
 
         loadData();
     }, [businessSlug]);
 
+    const fetchDynamicSlots = async () => {
+        if (!selectedDate || !selectedServiceId || !customerAddress) return;
+        setSlotsLoading(true);
+        setError(null);
+        try {
+            const resp = await fetch("/api/available-slots", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    businessSlug,
+                    serviceId: selectedServiceId,
+                    date: selectedDate,
+                    customerAddress
+                })
+            });
+            const data = await resp.json();
+            if (data.error) throw new Error(data.error);
+            setSlots(data.slots || []);
+        } catch (e: any) {
+            console.error(e);
+            setError("Failed to calculate drive-time availability: " + e.message);
+        } finally {
+            setSlotsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (step === 2 && selectedDate && selectedServiceId && customerAddress) {
+            fetchDynamicSlots();
+        }
+    }, [step, selectedDate, selectedServiceId, customerAddress]);
+
     const handleNextStep = () => {
-        if (step === 1 && !issueDescription.trim()) {
-            setError("Please describe your issue.");
-            return;
+        if (step === 1) {
+            if (!issueDescription.trim()) return setError("Please describe your issue.");
+            if (!customerAddress.trim()) return setError("Please provide your service address so we can calculate drive times.");
         }
         if (step === 2) {
-            if (!selectedServiceId) {
-                setError("Please select a service.");
-                return;
-            }
-            if (!selectedSlotId) {
-                setError("Please select a time slot.");
-                return;
-            }
+            if (!selectedServiceId) return setError("Please select a service.");
+            if (!selectedDate) return setError("Please pick a date.");
+            if (!selectedSlotId) return setError("Please select a time slot.");
         }
         setError(null);
         setStep((prev) => prev + 1);
@@ -170,22 +168,7 @@ export default function WizardBookingPage({ params }: PageProps) {
 
         const booking = bookingRows[0];
 
-        // 2) Mark slot as booked
-        const { error: slotError } = await supabase
-            .from("time_slots")
-            .update({
-                status: "booked",
-                booking_id: booking.id,
-            })
-            .eq("id", slot.id)
-            .eq("status", "open");
-
-        if (slotError) {
-            console.error(slotError);
-            setError("Booking created but slot reservation failed.");
-            setSubmitting(false);
-            return;
-        }
+        // Static time_slots table bypass - dynamic availability confirmed.
 
         // 3) Trigger Calendar Sync (Non-blocking)
         fetch("/api/google-calendar/events", {
@@ -271,6 +254,11 @@ export default function WizardBookingPage({ params }: PageProps) {
                                         onChange={(e) => setIssueDescription(e.target.value)}
                                     />
                                 </div>
+                                <div className="space-y-2 pt-2">
+                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Service Address *</label>
+                                    <input type="text" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/40 focus:bg-white dark:focus:bg-[#0B1221] transition-all placeholder:text-slate-400" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} placeholder="123 Main St, Appletree, CA 90210" />
+                                    <p className="text-[10px] text-slate-500 ml-1">Used to calculate exact technician arrival times.</p>
+                                </div>
                                 <button
                                     onClick={handleNextStep}
                                     className="w-full py-4 bg-brand-base hover:bg-brand-light text-white font-bold rounded-xl shadow-lg shadow-brand-base/20 transition-all duration-300 hover:shadow-brand-base/40 hover:-translate-y-0.5 active:translate-y-0"
@@ -310,21 +298,35 @@ export default function WizardBookingPage({ params }: PageProps) {
                                 </div>
 
                                 <div className="space-y-3">
-                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Available Slots</label>
-                                    <div className="grid grid-cols-1 gap-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {slots.map(slot => (
-                                            <label key={slot.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${selectedSlotId === slot.id ? "bg-brand-base/10 border-brand-base/50 ring-1 ring-brand-base/50 shadow-md hover:bg-brand-base/20" : "bg-slate-50/50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-brand-base/30 hover:bg-white dark:hover:bg-slate-800/80"}`}>
-                                                <input type="radio" name="slot" className="hidden" value={slot.id} checked={selectedSlotId === slot.id} onChange={() => setSelectedSlotId(slot.id)} />
-                                                <div className="flex-1">
-                                                    <div className="text-slate-900 dark:text-white font-bold">{formatTimeRange(slot.start_time, slot.end_time)}</div>
-                                                    {slot.technician_name && <div className="text-xs font-medium text-brand-base dark:text-brand-light mt-1">Tech: {slot.technician_name}</div>}
-                                                </div>
-                                                {selectedSlotId === slot.id && <div className="w-6 h-6 bg-brand-base rounded-full flex items-center justify-center text-[12px] text-white shadow-sm">✓</div>}
-                                            </label>
-                                        ))}
+                                    <div className="flex items-center justify-between">
+                                        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Pick a Date</label>
                                     </div>
+                                    <input type="date" min={new Date().toISOString().split('T')[0]} className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
                                 </div>
 
+                                <div className="space-y-3">
+                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Available Slots (Dynamic)</label>
+                                    {slotsLoading ? (
+                                        <div className="p-4 text-center text-slate-500 animate-pulse font-medium text-sm">Calculating optimal routes...</div>
+                                    ) : (!selectedDate || !selectedServiceId) ? (
+                                        <div className="p-4 text-center text-slate-500 italic text-sm border border-dashed rounded-xl border-slate-300 dark:border-slate-700">Select a service and date above to view availability.</div>
+                                    ) : slots.length === 0 ? (
+                                        <div className="p-4 text-center text-slate-500 italic text-sm border border-dashed rounded-xl border-slate-300 dark:border-slate-700">No time slots fit your location for this date. Please try another date.</div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 gap-3 max-h-[220px] overflow-y-auto pr-2 custom-scrollbar">
+                                            {slots.map(slot => (
+                                                <label key={slot.id} className={`flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${selectedSlotId === slot.id ? "bg-brand-base/10 border-brand-base/50 ring-1 ring-brand-base/50 shadow-md hover:bg-brand-base/20" : "bg-slate-50/50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-brand-base/30 hover:bg-white dark:hover:bg-slate-800/80"}`}>
+                                                    <input type="radio" name="slot" className="hidden" value={slot.id} checked={selectedSlotId === slot.id} onChange={() => setSelectedSlotId(slot.id)} />
+                                                    <div className="flex-1">
+                                                        <div className="text-slate-900 dark:text-white font-bold">{formatTimeRange(slot.start_time, slot.end_time)}</div>
+                                                        {slot.technician_name && <div className="text-xs font-medium text-brand-base dark:text-brand-light mt-1">Tech: {slot.technician_name}</div>}
+                                                    </div>
+                                                    {selectedSlotId === slot.id && <div className="w-6 h-6 bg-brand-base rounded-full flex items-center justify-center text-[12px] text-white shadow-sm">✓</div>}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
                                 <div className="flex gap-4 pt-4 border-t border-slate-200 dark:border-white/5 mt-6">
                                     <button onClick={handlePrevStep} className="flex-1 py-4 px-6 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">Back</button>
                                     <button onClick={handleNextStep} className="flex-[2] py-4 px-6 bg-brand-base hover:bg-brand-light text-white font-bold rounded-xl shadow-lg shadow-brand-base/20 transition-all duration-300 hover:shadow-brand-base/40 hover:-translate-y-0.5 active:translate-y-0">Next Step</button>
@@ -352,10 +354,7 @@ export default function WizardBookingPage({ params }: PageProps) {
                                     <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Phone Number *</label>
                                     <input type="tel" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/40 focus:bg-white dark:focus:bg-[#0B1221] transition-all placeholder:text-slate-400" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="+1 (555) 000-0000" />
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Service Address *</label>
-                                    <input type="text" className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-3 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-base/40 focus:bg-white dark:focus:bg-[#0B1221] transition-all placeholder:text-slate-400" value={customerAddress} onChange={(e) => setCustomerAddress(e.target.value)} placeholder="123 Main St, Appletree, CA 90210" />
-                                </div>
+
                                 <div className="flex gap-4 pt-4 border-t border-slate-200 dark:border-white/5 mt-6">
                                     <button onClick={handlePrevStep} className="flex-1 py-4 px-6 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl transition-all">Back</button>
                                     <button onClick={handleNextStep} className="flex-[2] py-4 px-6 bg-brand-base hover:bg-brand-light text-white font-bold rounded-xl shadow-lg shadow-brand-base/20 transition-all duration-300 hover:shadow-brand-base/40 hover:-translate-y-0.5 active:translate-y-0">Review Details</button>

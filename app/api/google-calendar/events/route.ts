@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createEvent, listEvents } from "@/app/lib/google-calendar";
+import { createEvent, listEvents, updateEvent } from "@/app/lib/google-calendar";
 import { supabase } from "@/app/lib/supabaseClient";
 import { sendSMS } from "@/app/lib/sms";
 
@@ -85,6 +85,13 @@ export async function POST(request: NextRequest) {
             });
         }
 
+        if (result.success && result.data?.id) {
+            await adminSupabase
+                .from("bookings")
+                .update({ google_event_id: result.data.id })
+                .eq("id", bookingId);
+        }
+
         if (booking.customer_phone) {
             const smsBody = `Hi ${booking.customer_name}, your booking for ${booking.services?.name} on ${startTime.toLocaleString()} is confirmed!`;
             sendSMS(booking.customer_phone, smsBody).catch(err => {
@@ -97,5 +104,54 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
         console.error("API Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+}
+
+export async function PUT(request: NextRequest) {
+    try {
+        const body = await request.json();
+        const { bookingId, eventId, type, businessSlug, start, end } = body;
+
+        if (!businessSlug || !start || !end) {
+            return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+        }
+
+        const adminSupabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+        let googleEventId = eventId;
+
+        if (type === "internal") {
+            if (!bookingId) return NextResponse.json({ error: "Missing booking ID" }, { status: 400 });
+
+            const { data: booking, error: bkError } = await adminSupabase
+                .from("bookings")
+                .select("google_event_id")
+                .eq("id", bookingId)
+                .single();
+
+            if (bkError || !booking?.google_event_id) {
+                console.warn(`No Google Event ID recorded for booking ${bookingId}`);
+                return NextResponse.json({ success: true, warning: "Internal booking has no Google Event ID synced." });
+            }
+            googleEventId = booking.google_event_id;
+        }
+
+        if (!googleEventId) {
+            return NextResponse.json({ error: "No Event ID provided" }, { status: 400 });
+        }
+
+        const result = await updateEvent(businessSlug, googleEventId, {
+            start: { dateTime: start },
+            end: { dateTime: end }
+        });
+
+        if (!result.success) {
+            return NextResponse.json({ error: result.error }, { status: 500 });
+        }
+
+        return NextResponse.json({ success: true, eventLink: result.data?.htmlLink });
+
+    } catch (e: any) {
+        console.error("PUT Error:", e);
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
 }
