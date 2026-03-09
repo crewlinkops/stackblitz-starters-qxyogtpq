@@ -43,6 +43,23 @@ export default function BookingsAdminPage() {
   const [updating, setUpdating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // New Booking State
+  const [googleConnected, setGoogleConnected] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [savingNew, setSavingNew] = useState(false);
+  const [addForm, setAddForm] = useState({
+    customerName: "",
+    customerEmail: "",
+    customerPhone: "",
+    customerAddress: "",
+    urgency: "normal",
+    serviceId: "",
+    technicianId: "",
+    preferredDate: "",
+    preferredTime: "09:00",
+    notes: ""
+  });
+
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
@@ -80,6 +97,14 @@ export default function BookingsAdminPage() {
     setError(null);
 
     try {
+      // Check google connection
+      const { data: tokenData } = await supabase
+        .from("google_tokens")
+        .select("business_slug")
+        .eq("business_slug", currentBusiness.slug)
+        .maybeSingle();
+      setGoogleConnected(!!tokenData);
+
       // technicians for name lookup
       const { data: techData, error: techErr } = await supabase
         .from("technicians")
@@ -165,6 +190,83 @@ export default function BookingsAdminPage() {
   };
 
   // ---------------------------------------------------------------------------
+  // Create Booking
+  // ---------------------------------------------------------------------------
+  const handleAddBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentBusiness) return;
+    setSavingNew(true);
+    setError(null);
+
+    try {
+      if (!addForm.customerName || !addForm.preferredDate || !addForm.preferredTime) {
+        throw new Error("Missing required fields: Name, Date, and Time are mandatory.");
+      }
+
+      const dateTimeString = `${addForm.preferredDate}T${addForm.preferredTime}:00`;
+
+      const { data: newBooking, error: insErr } = await supabase
+        .from("bookings")
+        .insert({
+          business_id: currentBusiness.id,
+          business_slug: currentBusiness.slug,
+          customer_name: addForm.customerName,
+          customer_email: addForm.customerEmail || null,
+          customer_phone: addForm.customerPhone || null,
+          customer_address: addForm.customerAddress || null,
+          urgency: addForm.urgency,
+          service_id: addForm.serviceId ? parseInt(addForm.serviceId) : null,
+          assigned_technician_id: addForm.technicianId ? parseInt(addForm.technicianId) : null,
+          preferred_time: new Date(dateTimeString).toISOString(),
+          notes: addForm.notes || null,
+          status: "confirmed"
+        })
+        .select()
+        .single();
+
+      if (insErr) throw insErr;
+
+      // Optimistic update
+      setBookings((prev) => [newBooking as Booking, ...prev]);
+
+      // Sync to Google Calendar if connected
+      if (googleConnected) {
+        await fetch("/api/google-calendar/events", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            slug: currentBusiness.slug,
+            summary: `Booking for ${addForm.customerName}`,
+            description: `${addForm.notes}\nPhone: ${addForm.customerPhone}\nAddress: ${addForm.customerAddress}\nUrgency: ${addForm.urgency}`,
+            start: new Date(dateTimeString).toISOString(),
+            durationMinutes: 60 // fallback
+          })
+        });
+      }
+
+      setShowAddModal(false);
+      setAddForm({
+        customerName: "",
+        customerEmail: "",
+        customerPhone: "",
+        customerAddress: "",
+        urgency: "normal",
+        serviceId: "",
+        technicianId: "",
+        preferredDate: "",
+        preferredTime: "09:00",
+        notes: ""
+      });
+
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Failed to create booking");
+    } finally {
+      setSavingNew(false);
+    }
+  };
+
+  // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   return (
@@ -186,15 +288,13 @@ export default function BookingsAdminPage() {
             </div>
           )}
           {currentBusiness && (
-            <a
-              href={`/wizard/${currentBusiness.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => setShowAddModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-sm font-bold rounded-xl transition-colors shadow-sm"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4"></path></svg>
               Create Booking
-            </a>
+            </button>
           )}
         </div>
       </header>
@@ -311,6 +411,119 @@ export default function BookingsAdminPage() {
           </div>
         )}
       </div>
+
+      {showAddModal && currentBusiness && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl shadow-xl w-full max-w-2xl border border-zinc-200 dark:border-white/10 my-8">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-white/10">
+              <h2 className="text-xl font-bold text-zinc-900 dark:text-white">Manual Booking Entry</h2>
+              <button onClick={() => setShowAddModal(false)} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              </button>
+            </div>
+
+            <form onSubmit={handleAddBooking} className="p-6 space-y-6">
+              {/* Customer Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Customer Name *</label>
+                  <input required type="text" value={addForm.customerName} onChange={(e) => setAddForm({ ...addForm, customerName: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40" placeholder="Jane Doe" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Email Address</label>
+                  <input type="email" value={addForm.customerEmail} onChange={(e) => setAddForm({ ...addForm, customerEmail: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40" placeholder="jane@example.com" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Phone Number</label>
+                  <input type="tel" value={addForm.customerPhone} onChange={(e) => setAddForm({ ...addForm, customerPhone: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40" placeholder="(555) 123-4567" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Service Address</label>
+                  <input type="text" value={addForm.customerAddress} onChange={(e) => setAddForm({ ...addForm, customerAddress: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40" placeholder="123 Main St" />
+                </div>
+              </div>
+
+              {/* Requirement */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Service Type</label>
+                  <div className="relative">
+                    <select value={addForm.serviceId} onChange={(e) => setAddForm({ ...addForm, serviceId: e.target.value })} className="w-full appearance-none bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40">
+                      <option value="">-- Select Service --</option>
+                      {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                      <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Urgency Level</label>
+                  <div className="relative">
+                    <select value={addForm.urgency} onChange={(e) => setAddForm({ ...addForm, urgency: e.target.value })} className={`w-full appearance-none border rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40 font-bold uppercase ${addForm.urgency === 'emergency' ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' :
+                        addForm.urgency === 'high' ? 'bg-orange-500/10 border-orange-500/30 text-orange-500' :
+                          'bg-zinc-100 dark:bg-zinc-800 border-zinc-200 dark:border-white/10 text-zinc-700 dark:text-zinc-300'
+                      }`}>
+                      <option value="normal">Normal</option>
+                      <option value="high">High Priority</option>
+                      <option value="emergency">Emergency</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-current">
+                      <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Scheduling & Tech */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Date *</label>
+                  <input required type="date" value={addForm.preferredDate} onChange={(e) => setAddForm({ ...addForm, preferredDate: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Time *</label>
+                  <input required type="time" value={addForm.preferredTime} onChange={(e) => setAddForm({ ...addForm, preferredTime: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Technician</label>
+                  <div className="relative">
+                    <select value={addForm.technicianId} onChange={(e) => setAddForm({ ...addForm, technicianId: e.target.value })} className="w-full appearance-none bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40">
+                      <option value="">Unassigned</option>
+                      {technicians.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                      <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-xs font-bold text-zinc-700 dark:text-zinc-300 uppercase tracking-wider mb-2">Internal Notes</label>
+                <textarea rows={3} value={addForm.notes} onChange={(e) => setAddForm({ ...addForm, notes: e.target.value })} className="w-full bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-600/40 resize-none" placeholder="Gate code is 1234..." />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-white/10">
+                <button type="button" onClick={() => setShowAddModal(false)} className="px-5 py-2.5 text-sm font-bold text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={savingNew} className="flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition-colors shadow-sm">
+                  {savingNew ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    "Create Booking"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
